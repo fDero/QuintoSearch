@@ -1,12 +1,9 @@
-/*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-*/
+
 package cmd
 
 import (
 	"fmt"
-	"quinto/pkg/tokenizer"
-
+	"quinto/frontend"
 	"github.com/spf13/cobra"
 )
 
@@ -16,33 +13,39 @@ var storeCmd = &cobra.Command{
 
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 
-		asInlineText, _ := cmd.Flags().GetBool("as-inline-text")
-		asFilePath, _ := cmd.Flags().GetBool("as-file-path")
+		asInlineText, _ := cmd.Flags().GetString("inline")
+		asFilePath, _ := cmd.Flags().GetString("filepath")
 
-		if asInlineText && asFilePath {
+		if len(asInlineText) > 0 && len(asFilePath) > 0 {
 			return fmt.Errorf("conflicting flags: --as-inline-text and --as-file-path cannot be set at the same time")
 		}
+
+		if len(asInlineText) + len(asFilePath) == 0 {
+			return fmt.Errorf("missing flags: --as-inline-text or --as-file-path must be set")
+		}
+
 		return nil
 	},
 
 	Run: func(cmd *cobra.Command, args []string) {
 
-		asInlineText, _ := cmd.Flags().GetBool("as-inline-text")
-		asFilePath, _ := cmd.Flags().GetBool("as-file-path")
+		asInlineText, _ := cmd.Flags().GetString("inline")
+		asFilePath, _ := cmd.Flags().GetString("filepath")
+		
+		var tokens []string
+		if (len(asInlineText) > 0) {
+			tokens = frontend.ProcessInputText(asInlineText)
+		} else if (len(asFilePath) > 0) {
+			tokens = frontend.ProcessInputFile(asFilePath)
+		}
 
-		fmt.Println(asInlineText)
-		fmt.Println(asFilePath)
-
-		var ss []string = tokenizer.Split("Hello, World!")
-		fmt.Println(ss)
-		fmt.Println(args)
-		fmt.Println(len(args))
-		fmt.Println("store called")
+		fmt.Println(tokens)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(storeCmd)
-	storeCmd.Flags().BoolP("as-inline-text", "i", false, "Treat inputs as inline text")
-	storeCmd.Flags().BoolP("as-file-path", "f", false, "Treat inputs as local file-paths")
+	storeCmd.Flags().String("inline", "", "Treat inputs as inline text")
+	storeCmd.Flags().String("filepath", "", "Treat inputs as local file-paths")
+	storeCmd.Flags().String("lang", "eng", "Select language: eng->English")
 }

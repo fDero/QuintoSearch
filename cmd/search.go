@@ -1,7 +1,4 @@
-/*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 
-*/
 package cmd
 
 import (
@@ -10,7 +7,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// searchCmd represents the search command
 var searchCmd = &cobra.Command{
 	Use:   "search",
 	Short: "A brief description of your command",
