@@ -54,7 +54,7 @@ func StopWordsFilter(tokens []string) []string {
 	for _, txt := range tokens {
 		isStopWord := false
         for _, stopword := range stopwords {
-			if strings.ToLower(txt) == strings.ToLower(stopword) {
+			if strings.EqualFold(txt, stopword) {
 				isStopWord = true
 				break
 			}
