@@ -1,9 +1,9 @@
-
 package cmd
 
 import (
 	"fmt"
 	"quinto/frontend"
+	"quinto/indexing"
 	"github.com/spf13/cobra"
 )
 
@@ -39,7 +39,8 @@ var storeCmd = &cobra.Command{
 			tokens = frontend.ProcessInputFile(asFilePath)
 		}
 
-		fmt.Println(tokens)
+		index := indexing.MakeNewEmptyInvertedIndex()
+		index.Store(tokens, 1)
 	},
 }
 
