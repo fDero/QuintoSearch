@@ -43,8 +43,10 @@ func removeDoubleConsonantAwareSuffix(text string, suffix string) string {
 	if strings.HasSuffix(text, suffix) {
 		textLen := len(text)
 		suffLen := len(suffix)
-		if textLen > suffLen + 2 && text[textLen - suffLen + 1] == text[textLen - suffLen] {
-			prev := string(text[textLen - suffLen])
+		prevIndex := textLen - suffLen - 1
+		prev2Index := prevIndex - 1
+		if textLen > suffLen + 2 && text[prevIndex] == text[prev2Index] {
+			prev := string(text[prevIndex])
 			trimmed := strings.TrimSuffix(text, prev + suffix)
 			return trimmed
 		}
@@ -65,15 +67,7 @@ func removeLastVowel(text string) string {
 	return text
 }
 
-func removePlural(text string) string {
-	pluarPatterns := []stemmingPattern {
-		{suffix: "sses", replacement: "ss", minLen: 4, maxLen: 0},
-		{suffix: "ies",  replacement: "y",  minLen: 0, maxLen: 4},
-		{suffix: "es",   replacement: "e",  minLen: 0, maxLen: 5},
-		{suffix: "es",   replacement: "",   minLen: 5, maxLen: 0},
-	}
-	oldText := text
-	text = matchAndReplace(text, pluarPatterns)
+func removeLastS(text string, oldText string) string {
 	if oldText == text && strings.HasSuffix(text, "s") {
 		if hasVowelBeforeLastNChars(text, 2) {
 			return strings.TrimSuffix(text, "s")
@@ -84,56 +78,50 @@ func removePlural(text string) string {
 	return text
 }
 
-func removeYbasedSuffixes(text string) string {
+func removeStrongSuffix(text string) string {
+	for _, suffix := range []string{"ing", "er", "ed"} {
+		newText := removeDoubleConsonantAwareSuffix(text, suffix)
+		if newText != text {
+			return newText
+		}
+	}
+	return text
+}
+
+func removeSimpleSuffix(text string) string {
 	return matchAndReplace(text, []stemmingPattern {
-		{suffix: "eedly", replacement: "ee",  minLen: 7, maxLen: 0},
-		{suffix: "edly",  replacement: "ed",  minLen: 6, maxLen: 0},
-		{suffix: "ingly", replacement: "ing", minLen: 0, maxLen: 0},
-	})
-}
-
-func removePast(text string) string {
-	return matchAndReplace(text, []stemmingPattern {
-		{suffix: "ied", replacement: "y",  minLen: 4, maxLen: 0},
-		{suffix: "ies", replacement: "ie", minLen: 0, maxLen: 5},
-		{suffix: "ed",  replacement: "",   minLen: 5, maxLen: 0},
-	})
-}
-
-func removeIngSuffix(text string) string {
-	return removeDoubleConsonantAwareSuffix(text, "ing")
-}
-
-func removeErSuffix(text string) string {
-	return removeDoubleConsonantAwareSuffix(text, "er")
-}
-
-func removeComplexSuffix(text string) string {
-	return matchAndReplace(text, []stemmingPattern {
+		{suffix: "fulness",  replacement: "",     minLen: 0, maxLen: 0},
 		{suffix: "tional",   replacement: "tion", minLen: 0, maxLen: 0},
+		{suffix: "erable",   replacement: "",     minLen: 0, maxLen: 0},
+		{suffix: "ingly",    replacement: "ing",  minLen: 0, maxLen: 0},
+		{suffix: "alism",    replacement: "",     minLen: 0, maxLen: 0},
+		{suffix: "ative",    replacement: "",     minLen: 0, maxLen: 0},
+		{suffix: "eedly",    replacement: "ee",   minLen: 7, maxLen: 0},
+		{suffix: "sses",     replacement: "ss",   minLen: 4, maxLen: 0},
+		{suffix: "edly",     replacement: "ed",   minLen: 6, maxLen: 0},
 		{suffix: "iful",     replacement: "y",    minLen: 0, maxLen: 0},
 		{suffix: "ened",     replacement: "",     minLen: 0, maxLen: 0},
-		{suffix: "alism",    replacement: "",     minLen: 0, maxLen: 0},
-		{suffix: "fulness",  replacement: "",     minLen: 0, maxLen: 0},
-		{suffix: "ful",      replacement: "",     minLen: 0, maxLen: 0},
 		{suffix: "ness",     replacement: "",     minLen: 0, maxLen: 0},
-		{suffix: "or",       replacement: "",     minLen: 0, maxLen: 0},
-		{suffix: "ative",    replacement: "",     minLen: 0, maxLen: 0},
+		{suffix: "ful",      replacement: "",     minLen: 0, maxLen: 0},
+		{suffix: "ies",      replacement: "y",    minLen: 0, maxLen: 4},
 		{suffix: "ery",      replacement: "",     minLen: 5, maxLen: 0},
 		{suffix: "ion",      replacement: "",     minLen: 5, maxLen: 0},
+		{suffix: "ied",      replacement: "y",    minLen: 4, maxLen: 0},
+		{suffix: "ies",      replacement: "ie",   minLen: 0, maxLen: 5},
+		{suffix: "or",       replacement: "",     minLen: 0, maxLen: 0},
+		{suffix: "ed",       replacement: "",     minLen: 5, maxLen: 0},
+		{suffix: "es",       replacement: "e",    minLen: 0, maxLen: 5},
+		{suffix: "es",       replacement: "",     minLen: 5, maxLen: 0},
 	})
 }
 
-func normalizeSingleToken(token string) string {
-	token = removeComplexSuffix(token)
-	token = removePlural(token)
-	token = removeComplexSuffix(token)
-	token = removeYbasedSuffixes(token)
-	token = removePast(token)
-	token = removeIngSuffix(token)
-	token = removeErSuffix(token)
-	token = removeLastVowel(token)
-	return token
+func normalizeSingleToken(text string) string {
+	oldText := text
+	text = removeStrongSuffix(text)
+	text = removeSimpleSuffix(text)
+	text = removeLastS(text, oldText)
+	text = removeLastVowel(text)
+	return text
 }
 
 func NormalizeTokens(tokens []string) []string {
