@@ -5,10 +5,7 @@ import (
 )
 
 func TestIncrementScoreAndGetBestMatches(t *testing.T) {
-	search_results := SearchResults{
-		scoreByDocumentId:           make(map[uint64]uint64),
-		sortedBestMatchingDocuments: make([]uint64, 0),
-	}
+	search_results := NewSearchResult()
 	search_results.incrementScore(1, 40)
 	search_results.incrementScore(2, 30)
 	search_results.incrementScore(1, 10)
@@ -25,10 +22,7 @@ func TestIncrementScoreAndGetBestMatches(t *testing.T) {
 }
 
 func TestIncrementScoreAndGetSizeInPages(t *testing.T) {
-	search_results := SearchResults{
-		scoreByDocumentId:           make(map[uint64]uint64),
-		sortedBestMatchingDocuments: make([]uint64, 0),
-	}
+	search_results := NewSearchResult()
 	search_results.incrementScore(1, 40)
 	search_results.incrementScore(2, 30)
 	search_results.incrementScore(3, 10)

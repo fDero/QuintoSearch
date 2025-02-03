@@ -2,13 +2,12 @@ package persistence
 
 import (
 	"bufio"
-	"quinto/indexing"
 )
 
-func StoreOnDisk(fileWriter bufio.Writer, invertedList indexing.InvertedList) error {
+func StoreOnDisk(fileWriter bufio.Writer, invertedList segment) error {
 	lastDocumentId := uint64(0)
 	lastPosition := 0
-	for tracker := range invertedList.Iterator() {
+	for tracker := range invertedList.iterator() {
 
 		documentIdDelta := tracker.DocumentId - lastDocumentId
 		positionDelta := tracker.Position - lastPosition
@@ -34,8 +33,8 @@ func StoreOnDisk(fileWriter bufio.Writer, invertedList indexing.InvertedList) er
 	return nil
 }
 
-func LoadFromDisk(fileReader bufio.Reader) (indexing.InvertedList, error) {
-	var invertedList indexing.InvertedList
+func LoadFromDisk(fileReader bufio.Reader) (segment, error) {
+	var invertedList segment
 
 	documentId := uint64(0)
 	position := 0
@@ -61,7 +60,7 @@ func LoadFromDisk(fileReader bufio.Reader) (indexing.InvertedList, error) {
 			position = int(positionMaybeDeltaMaybeAbsolute)
 		}
 
-		invertedList.Add(indexing.TermTracker{
+		invertedList.add(TermTracker{
 			DocumentId: documentId,
 			Position:   position,
 		})

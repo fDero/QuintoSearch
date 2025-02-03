@@ -4,6 +4,18 @@ import (
 	"sort"
 )
 
+type SearchResults struct {
+	scoreByDocumentId           map[uint64]uint64
+	sortedBestMatchingDocuments []uint64
+}
+
+func NewSearchResult() *SearchResults {
+	return &SearchResults{
+		scoreByDocumentId:           make(map[uint64]uint64),
+		sortedBestMatchingDocuments: make([]uint64, 0),
+	}
+}
+
 func (sr *SearchResults) incrementScore(documentId uint64, additiveIncrement uint64) {
 	newScore := additiveIncrement
 	if oldScore, ok := sr.scoreByDocumentId[documentId]; ok {
