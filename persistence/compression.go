@@ -22,9 +22,10 @@ func vbyteEncodeUInt64(uint64Value uint64) []byte {
 
 func vbyteDecodeUInt64(encoded []byte) uint64 {
 	var decoded uint64
-	for _, encodedByte := range encoded {
-		decoded |= uint64(encodedByte & 0x7F)
+	for i := len(encoded) - 1; i >= 0; i-- {
 		decoded <<= 7
+		encodedByte := encoded[i]
+		decoded |= uint64(encodedByte & 0x7F)
 	}
 	return decoded
 }
