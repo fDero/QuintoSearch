@@ -33,7 +33,7 @@ func NewPersistenceManager(dbDirectory string) *PersistenceManager {
 func (pm *PersistenceManager) GetInvertedListIterator(term string) iter.Seq[misc.TermTracker] {
 	return func(yield func(misc.TermTracker) bool) {
 		for counter := 0; true; counter++ {
-			currentKey := term + "_" + fmt.Sprint(counter)
+			currentKey := fmt.Sprint(term, "_", counter)
 			syncseg, found := pm.segments_cache.Get(currentKey)
 			if !found {
 				// TODO: actually it should be fetched from disk
@@ -49,12 +49,12 @@ func (pm *PersistenceManager) GetInvertedListIterator(term string) iter.Seq[misc
 
 func (pm *PersistenceManager) getCacheKey(term string, documentId uint64) string {
 	for counter := 0; true; counter++ {
-		currentKey := term + "_" + fmt.Sprint(counter)
+		currentKey := fmt.Sprint(term, "_", counter)
 		segment, found := pm.segments_cache.Get(currentKey)
-		if !found || segment.seg.size < 1 {
+		if !found || segment.underlyng.size < 1 {
 			return currentKey
 		}
-		if segment.seg.tail.tracker.DocumentId <= documentId {
+		if segment.underlyng.tail.tracker.DocumentId <= documentId {
 			return currentKey
 		}
 	}

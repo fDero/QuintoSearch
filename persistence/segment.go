@@ -30,19 +30,19 @@ func newSegment() *segment {
 	}
 }
 
-func (invlst *segment) estimateSize() int64 {
+func (seg *segment) estimateSize() int64 {
 	estimatedSize := uintptr(0)
-	if invlst.size != 0 {
-		estimatedSize += unsafe.Sizeof(*invlst.head)
-		estimatedSize *= uintptr(invlst.size)
+	if seg.size != 0 {
+		estimatedSize += unsafe.Sizeof(*seg.head)
+		estimatedSize *= uintptr(seg.size)
 	}
-	estimatedSize += unsafe.Sizeof(*invlst)
+	estimatedSize += unsafe.Sizeof(*seg)
 	return int64(estimatedSize)
 }
 
-func (invlst *segment) iterator() iter.Seq[misc.TermTracker] {
+func (seg *segment) iterator() iter.Seq[misc.TermTracker] {
 	return func(yield func(misc.TermTracker) bool) {
-		for current := invlst.head; current != nil; current = current.next {
+		for current := seg.head; current != nil; current = current.next {
 			if !yield(current.tracker) {
 				break
 			}
@@ -50,9 +50,9 @@ func (invlst *segment) iterator() iter.Seq[misc.TermTracker] {
 	}
 }
 
-func (invlst *segment) getInsertionPoint(tracker misc.TermTracker) **segmentNode {
+func (seg *segment) getInsertionPoint(tracker misc.TermTracker) **segmentNode {
 	var insertionPoint **segmentNode = nil
-	for insertionPoint = &invlst.head; *insertionPoint != nil; insertionPoint = &((*insertionPoint).next) {
+	for insertionPoint = &seg.head; *insertionPoint != nil; insertionPoint = &((*insertionPoint).next) {
 		overshootByDocumentId := (*insertionPoint).tracker.DocumentId > tracker.DocumentId
 		onExactDocumentId := (*insertionPoint).tracker.DocumentId == tracker.DocumentId
 		overshootByPosition := onExactDocumentId && (*insertionPoint).tracker.Position > tracker.Position
@@ -63,8 +63,8 @@ func (invlst *segment) getInsertionPoint(tracker misc.TermTracker) **segmentNode
 	return insertionPoint
 }
 
-func (invlst *segment) add(tracker misc.TermTracker) {
-	var insertionPoint **segmentNode = invlst.getInsertionPoint(tracker)
+func (seg *segment) add(tracker misc.TermTracker) {
+	var insertionPoint **segmentNode = seg.getInsertionPoint(tracker)
 	var newNextNode *segmentNode = nil
 	if *insertionPoint != nil {
 		newNextNode = (*insertionPoint).next
@@ -73,10 +73,10 @@ func (invlst *segment) add(tracker misc.TermTracker) {
 		tracker: tracker,
 		next:    newNextNode,
 	}
-	if invlst.tail == nil {
-		invlst.tail = *insertionPoint
+	if seg.tail == nil {
+		seg.tail = *insertionPoint
 	}
-	invlst.size++
-	invlst.highestDocumentId = max(invlst.highestDocumentId, tracker.DocumentId)
-	invlst.lowestDocumentId = min(invlst.lowestDocumentId, tracker.DocumentId)
+	seg.size++
+	seg.highestDocumentId = max(seg.highestDocumentId, tracker.DocumentId)
+	seg.lowestDocumentId = min(seg.lowestDocumentId, tracker.DocumentId)
 }
