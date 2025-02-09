@@ -3,6 +3,7 @@ package persistence
 import (
 	"iter"
 	"quinto/misc"
+	"unsafe"
 )
 
 type segment struct {
@@ -27,6 +28,16 @@ func newSegment() *segment {
 		lowestDocumentId:  0,
 		highestDocumentId: 0,
 	}
+}
+
+func (invlst *segment) estimateSize() int64 {
+	estimatedSize := uintptr(0)
+	if invlst.size != 0 {
+		estimatedSize += unsafe.Sizeof(*invlst.head)
+		estimatedSize *= uintptr(invlst.size)
+	}
+	estimatedSize += unsafe.Sizeof(*invlst)
+	return int64(estimatedSize)
 }
 
 func (invlst *segment) iterator() iter.Seq[misc.TermTracker] {

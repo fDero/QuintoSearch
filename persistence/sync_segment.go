@@ -3,6 +3,7 @@ package persistence
 import (
 	"iter"
 	"quinto/misc"
+	"unsafe"
 )
 
 type synchronizedSegment struct {
@@ -15,6 +16,12 @@ func newSynchronizedSegment() *synchronizedSegment {
 		seg:   *newSegment(),
 		mutex: *misc.NewWritersFirstRWMutex(),
 	}
+}
+
+func (syncseg *synchronizedSegment) estimateSize() int64 {
+	syncseg.mutex.RLock()
+	defer syncseg.mutex.RUnlock()
+	return int64(unsafe.Sizeof(syncseg.mutex)) + syncseg.seg.estimateSize()
 }
 
 func (syncseg *synchronizedSegment) iterator() iter.Seq[misc.TermTracker] {

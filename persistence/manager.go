@@ -4,18 +4,20 @@ import (
 	"fmt"
 	"iter"
 	"quinto/misc"
+	"sync"
 
 	"github.com/dgraph-io/ristretto/v2"
 )
 
 type PersistenceManager struct {
-	segments_cache *ristretto.Cache[string, synchronizedSegment]
+	segments_cache *ristretto.Cache[string, *synchronizedSegment]
+	cache_mutex    sync.Mutex
 }
 
 func NewPersistenceManager(dbDirectory string) *PersistenceManager {
 	const oneGigabyteOfStorageCapacity = 1 << 30
 	const maximumNumberOfCacheBuckets = 1e7
-	cache, err := ristretto.NewCache(&ristretto.Config[string, synchronizedSegment]{
+	cache, err := ristretto.NewCache(&ristretto.Config[string, *synchronizedSegment]{
 		NumCounters: maximumNumberOfCacheBuckets,
 		MaxCost:     oneGigabyteOfStorageCapacity,
 		BufferItems: 64,
@@ -67,15 +69,18 @@ func (pm *PersistenceManager) StoreNewDocument(documentId uint64, documentInputT
 			key = pm.getCacheKey(token.StemmedText, documentId)
 			segmentsForGivenTermInCurrentDocument[token.StemmedText] = key
 		}
+		pm.cache_mutex.Lock()
 		syncseg, found := pm.segments_cache.Get(key)
 		if !found {
-			pm.segments_cache.Set(key, *newSynchronizedSegment(), 1)
+			syncseg = newSynchronizedSegment()
+			pm.segments_cache.Set(key, syncseg, syncseg.estimateSize())
 			pm.segments_cache.Wait()
-			syncseg, _ = pm.segments_cache.Get(key)
 		}
+		pm.cache_mutex.Unlock()
 		syncseg.add(misc.TermTracker{
 			DocumentId: documentId,
 			Position:   token.Position,
 		})
+		pm.segments_cache.Set(key, syncseg, syncseg.estimateSize())
 	}
 }
