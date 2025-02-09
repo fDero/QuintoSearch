@@ -1,17 +1,14 @@
 package persistence
 
 import (
-	"testing"
-
-	// "crypto/rand"
 	"bytes"
 	"encoding/binary"
 	"os"
+	"testing"
 )
 
-func TestVbyteEncodeUInt64(t *testing.T) {
+func TestVbyteEncodeUInt64EdgeCases(t *testing.T) {
 	expected := map[uint64][]byte{
-		// some edge cases
 		0:          {0},
 		0x80:       {1, 0x80},
 		0x400:      {8, 0x80},
@@ -20,7 +17,18 @@ func TestVbyteEncodeUInt64(t *testing.T) {
 		0xFFFF:     {3, 0xFF, 0xFF},
 		0xFFFFFF:   {7, 0xFF, 0xFF, 0xFF},
 		0xFFFFFFFF: {15, 0xFF, 0xFF, 0xFF, 0xFF},
-		// some random cases
+	}
+	for key, value := range expected {
+		en := vbyteEncodeUInt64(key)
+		t.Logf("%v", en)
+		if !bytes.Equal(value, vbyteEncodeUInt64(key)) {
+			t.Errorf("Expected %v, got %v", value, en)
+		}
+	}
+}
+
+func TestVbyteEncodeUInt64CommonCases(t *testing.T) {
+	expected := map[uint64][]byte{
 		17726549421771500413: {1, 246, 128, 214, 216, 250, 144, 226, 214, 253},
 		226058532925797298:   {3, 145, 199, 225, 155, 203, 243, 231, 178},
 		14236130522442077043: {1, 197, 200, 185, 169, 138, 242, 134, 166, 243},
@@ -38,7 +46,6 @@ func TestVbyteEncodeUInt64(t *testing.T) {
 		251263606851712567:   {3, 190, 170, 221, 180, 251, 132, 236, 183},
 		18370130104345724863: {1, 254, 247, 244, 128, 131, 153, 242, 143, 191},
 	}
-
 	for key, value := range expected {
 		en := vbyteEncodeUInt64(key)
 		t.Logf("%v", en)
