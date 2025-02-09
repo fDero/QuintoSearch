@@ -1,23 +1,81 @@
 package persistence
 
+import (
+	"fmt"
+	"iter"
+	"quinto/misc"
+
+	"github.com/dgraph-io/ristretto/v2"
+)
+
 type PersistenceManager struct {
-	recapDirectoty   string
-	segmentDirectory string
-	latestDocumentId uint64
-	currentTick      uint64
+	segments_cache *ristretto.Cache[string, synchronizedSegment]
 }
 
 func NewPersistenceManager(dbDirectory string) *PersistenceManager {
+	const oneGigabyteOfStorageCapacity = 1 << 30
+	const maximumNumberOfCacheBuckets = 1e7
+	cache, err := ristretto.NewCache(&ristretto.Config[string, synchronizedSegment]{
+		NumCounters: maximumNumberOfCacheBuckets,
+		MaxCost:     oneGigabyteOfStorageCapacity,
+		BufferItems: 64,
+	})
+	if err != nil {
+		panic("Failed to create cache while constructing 'PersistenceManager'")
+	}
 	return &PersistenceManager{
-		segmentDirectory: dbDirectory + "/segments",
-		recapDirectoty:   dbDirectory + "/recap",
-		latestDocumentId: 0,
-		currentTick:      0,
+		segments_cache: cache,
 	}
 }
 
-func (pm *PersistenceManager) GenerateDocumentId() uint64 {
-	documentId := 1 + pm.latestDocumentId
-	pm.latestDocumentId = documentId
-	return documentId
+func (pm *PersistenceManager) GetInvertedListIterator(term string) iter.Seq[misc.TermTracker] {
+	return func(yield func(misc.TermTracker) bool) {
+		for counter := 0; true; counter++ {
+			currentKey := term + "_" + fmt.Sprint(counter)
+			syncseg, found := pm.segments_cache.Get(currentKey)
+			if !found {
+				// TODO: actually it should be fetched from disk
+				// only if not found, iteration should stop
+				break
+			}
+			for term := range syncseg.iterator() {
+				yield(term)
+			}
+		}
+	}
+}
+
+func (pm *PersistenceManager) getCacheKey(term string, documentId uint64) string {
+	for counter := 0; true; counter++ {
+		currentKey := term + "_" + fmt.Sprint(counter)
+		segment, found := pm.segments_cache.Get(currentKey)
+		if !found || segment.seg.size < 1 {
+			return currentKey
+		}
+		if segment.seg.tail.tracker.DocumentId <= documentId {
+			return currentKey
+		}
+	}
+	panic("illegal state during execution of 'PersistenceManager.getCacheKey'")
+}
+
+func (pm *PersistenceManager) StoreNewDocument(documentId uint64, documentInputTokenStream iter.Seq[misc.Token]) {
+	segmentsForGivenTermInCurrentDocument := make(map[string]string)
+	for token := range documentInputTokenStream {
+		key, found := segmentsForGivenTermInCurrentDocument[token.StemmedText]
+		if !found {
+			key = pm.getCacheKey(token.StemmedText, documentId)
+			segmentsForGivenTermInCurrentDocument[token.StemmedText] = key
+		}
+		syncseg, found := pm.segments_cache.Get(key)
+		if !found {
+			pm.segments_cache.Set(key, *newSynchronizedSegment(), 1)
+			pm.segments_cache.Wait()
+			syncseg, _ = pm.segments_cache.Get(key)
+		}
+		syncseg.add(misc.TermTracker{
+			DocumentId: documentId,
+			Position:   token.Position,
+		})
+	}
 }

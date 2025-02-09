@@ -1,4 +1,4 @@
-package persistence
+package misc
 
 type TermTracker struct {
 	DocumentId uint64

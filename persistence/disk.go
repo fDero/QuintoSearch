@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"bufio"
+	"quinto/misc"
 )
 
 func StoreOnDisk(fileWriter bufio.Writer, invertedList segment) error {
@@ -60,7 +61,7 @@ func LoadFromDisk(fileReader bufio.Reader) (segment, error) {
 			position = int(positionMaybeDeltaMaybeAbsolute)
 		}
 
-		invertedList.add(TermTracker{
+		invertedList.add(misc.TermTracker{
 			DocumentId: documentId,
 			Position:   position,
 		})

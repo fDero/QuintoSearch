@@ -17,15 +17,15 @@ func newSynchronizedSegment() *synchronizedSegment {
 	}
 }
 
-func (syncseg *synchronizedSegment) iterator() iter.Seq[TermTracker] {
-	return func(yield func(TermTracker) bool) {
+func (syncseg *synchronizedSegment) iterator() iter.Seq[misc.TermTracker] {
+	return func(yield func(misc.TermTracker) bool) {
 		syncseg.mutex.RLock()
 		defer syncseg.mutex.RUnlock()
-		syncseg.iterator()(yield)
+		syncseg.seg.iterator()(yield)
 	}
 }
 
-func (syncseg *synchronizedSegment) add(tracker TermTracker) {
+func (syncseg *synchronizedSegment) add(tracker misc.TermTracker) {
 	syncseg.mutex.Lock()
 	defer syncseg.mutex.Unlock()
 	syncseg.seg.add(tracker)
