@@ -44,7 +44,7 @@ func vbyteDecodeUInt64(encoded []byte) uint64 {
 	return decoded
 }
 
-func loadVbyteEncodedUInt64(fileReader bufio.Reader) ([]byte, error) {
+func loadVbyteEncodedUInt64(fileReader *bufio.Reader) ([]byte, error) {
 	var encoded []byte
 	encodedByte, err := fileReader.ReadByte()
 	for ; err != nil; encodedByte, err = fileReader.ReadByte() {

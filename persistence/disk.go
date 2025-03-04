@@ -34,8 +34,8 @@ func StoreOnDisk(fileWriter bufio.Writer, invertedList segment) error {
 	return nil
 }
 
-func LoadFromDisk(fileReader bufio.Reader) (segment, error) {
-	var invertedList segment
+func LoadFromDisk(fileReader *bufio.Reader) (*segment, error) {
+	var invertedList *segment
 
 	documentId := uint64(0)
 	position := 0

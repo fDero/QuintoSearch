@@ -11,9 +11,12 @@ type synchronizedSegment struct {
 	mutex     misc.WritersFirstRWMutex
 }
 
-func newSynchronizedSegment() *synchronizedSegment {
+func newSynchronizedSegment(seg *segment) *synchronizedSegment {
+	if seg == nil {
+		seg = newSegment()
+	}
 	return &synchronizedSegment{
-		underlyng: *newSegment(),
+		underlyng: *seg,
 		mutex:     *misc.NewWritersFirstRWMutex(),
 	}
 }

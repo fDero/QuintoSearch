@@ -1,8 +1,10 @@
 package persistence
 
 import (
+	"bufio"
 	"fmt"
 	"iter"
+	"os"
 	"quinto/misc"
 	"sync"
 
@@ -10,8 +12,9 @@ import (
 )
 
 type PersistenceManager struct {
-	segments_cache *ristretto.Cache[string, *synchronizedSegment]
-	cache_mutex    sync.Mutex
+	segments    *ristretto.Cache[string, *synchronizedSegment]
+	mutex       sync.Mutex
+	dbDirectory string
 }
 
 func NewPersistenceManager(dbDirectory string) *PersistenceManager {
@@ -26,18 +29,41 @@ func NewPersistenceManager(dbDirectory string) *PersistenceManager {
 		panic("Failed to create cache while constructing 'PersistenceManager'")
 	}
 	return &PersistenceManager{
-		segments_cache: cache,
+		segments:    cache,
+		mutex:       sync.Mutex{},
+		dbDirectory: dbDirectory,
 	}
+}
+
+func (pm *PersistenceManager) SearchOnDisk(term string, blockCounter int) (*synchronizedSegment, bool) {
+	currentKey := fmt.Sprint(term, "_", blockCounter)
+	files, err := os.ReadDir(pm.dbDirectory)
+	if err != nil {
+		panic("Failed to access db-directory")
+	}
+	for _, file := range files {
+		if file.Name() == currentKey {
+			completePath := fmt.Sprint(pm.dbDirectory, "/", currentKey)
+			file, _ := os.Open(completePath)
+			reader := bufio.NewReader(file)
+			extracted, _ := LoadFromDisk(reader)
+			syncseg := newSynchronizedSegment(extracted)
+			pm.segments.Set(currentKey, syncseg, syncseg.estimateSize())
+			return syncseg, true
+		}
+	}
+	return nil, false
 }
 
 func (pm *PersistenceManager) GetInvertedListIterator(term string) iter.Seq[misc.TermTracker] {
 	return func(yield func(misc.TermTracker) bool) {
 		for counter := 0; true; counter++ {
 			currentKey := fmt.Sprint(term, "_", counter)
-			syncseg, found := pm.segments_cache.Get(currentKey)
+			syncseg, found := pm.segments.Get(currentKey)
 			if !found {
-				// TODO: actually it should be fetched from disk
-				// only if not found, iteration should stop
+				syncseg, found = pm.SearchOnDisk(term, counter)
+			}
+			if !found {
 				break
 			}
 			for term := range syncseg.iterator() {
@@ -50,7 +76,7 @@ func (pm *PersistenceManager) GetInvertedListIterator(term string) iter.Seq[misc
 func (pm *PersistenceManager) getCacheKey(term string, documentId uint64) string {
 	for counter := 0; true; counter++ {
 		currentKey := fmt.Sprint(term, "_", counter)
-		segment, found := pm.segments_cache.Get(currentKey)
+		segment, found := pm.segments.Get(currentKey)
 		if !found || segment.underlyng.size < 1 {
 			return currentKey
 		}
@@ -69,18 +95,18 @@ func (pm *PersistenceManager) StoreNewDocument(documentId uint64, documentInputT
 			key = pm.getCacheKey(token.StemmedText, documentId)
 			segmentsForGivenTermInCurrentDocument[token.StemmedText] = key
 		}
-		pm.cache_mutex.Lock()
-		syncseg, found := pm.segments_cache.Get(key)
+		pm.mutex.Lock()
+		syncseg, found := pm.segments.Get(key)
 		if !found {
-			syncseg = newSynchronizedSegment()
-			pm.segments_cache.Set(key, syncseg, syncseg.estimateSize())
-			pm.segments_cache.Wait()
+			syncseg = newSynchronizedSegment(nil)
+			pm.segments.Set(key, syncseg, syncseg.estimateSize())
+			pm.segments.Wait()
 		}
-		pm.cache_mutex.Unlock()
+		pm.mutex.Unlock()
 		syncseg.add(misc.TermTracker{
 			DocumentId: documentId,
 			Position:   token.Position,
 		})
-		pm.segments_cache.Set(key, syncseg, syncseg.estimateSize())
+		pm.segments.Set(key, syncseg, syncseg.estimateSize())
 	}
 }
