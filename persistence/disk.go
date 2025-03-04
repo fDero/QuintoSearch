@@ -2,10 +2,11 @@ package persistence
 
 import (
 	"bufio"
+	"io"
 	"quinto/misc"
 )
 
-func StoreOnDisk(fileWriter bufio.Writer, invertedList segment) error {
+func StoreOnDisk(fileWriter *bufio.Writer, invertedList segment) error {
 	lastDocumentId := uint64(0)
 	lastPosition := 0
 	for tracker := range invertedList.iterator() {
@@ -35,13 +36,16 @@ func StoreOnDisk(fileWriter bufio.Writer, invertedList segment) error {
 }
 
 func LoadFromDisk(fileReader *bufio.Reader) (*segment, error) {
-	var invertedList *segment
+	var invertedList *segment = newSegment()
 
 	documentId := uint64(0)
 	position := 0
 
 	for {
 		encodedDocumentIdDelta, idErr := loadVbyteEncodedUInt64(fileReader)
+		if idErr == io.EOF {
+			return invertedList, nil
+		}
 		if idErr != nil {
 			return invertedList, idErr
 		}
