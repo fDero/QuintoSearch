@@ -1,3 +1,17 @@
+/*=================================== LICENSE =======================================
+
+                                   Apache License
+                             Version 2.0, January 2004
+                          http://www.apache.org/licenses/
+
+============================== BRIEF FILE DESCRIPTION ===============================
+
+A synchronizedSegment is just a convenient wrapper around a segment that provides
+synchronization primitives to ensure that the segment can be safely accessed by
+multiple goroutines. This is useful when the segment is shared between multiple
+goroutines, such as when it is stored in a cache.
+==================================================================================*/
+
 package persistence
 
 import (

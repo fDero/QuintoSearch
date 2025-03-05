@@ -1,3 +1,18 @@
+/*=================================== LICENSE =======================================
+
+                                   Apache License
+                             Version 2.0, January 2004
+                          http://www.apache.org/licenses/
+
+============================== BRIEF FILE DESCRIPTION ===============================
+
+Storing and loading inverted lists on/from disk is a crucial part of the persistence
+layer. This file contains the functions that are used to store and load inverted lists
+from disk. The inverted lists are stored in a custom binary format that uses v-byte
+encoding to compress the document IDs and positions. This format is optimized for
+space efficiency and fast read/write operations.
+==================================================================================*/
+
 package persistence
 
 import (
@@ -6,7 +21,7 @@ import (
 	"quinto/misc"
 )
 
-func StoreOnDisk(fileWriter *bufio.Writer, invertedList segment) error {
+func StoreOnDisk(fileWriter *bufio.Writer, invertedList *segment) error {
 	lastDocumentId := uint64(0)
 	lastPosition := 0
 	for tracker := range invertedList.iterator() {

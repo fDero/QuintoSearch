@@ -1,3 +1,18 @@
+/*=================================== LICENSE =======================================
+
+                                   Apache License
+                             Version 2.0, January 2004
+                          http://www.apache.org/licenses/
+
+============================== BRIEF FILE DESCRIPTION ===============================
+
+A segment is a sub-unit of an inverted list for a given term. It is implemented as a
+linked list of term trackers, which are used to store the document ID and position of
+a term in a document. Inverted lists are stored in segments so that they can be locked
+and updated independently of other segments. This allows for concurrent reads and writes
+to the inverted index without the need for a global lock.
+==================================================================================*/
+
 package persistence
 
 import (
