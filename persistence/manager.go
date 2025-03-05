@@ -8,10 +8,10 @@
 
 A PersistenceManager is responsible for storing documents on disk and managing the
 inverted index. A cache is used to store segments of inverted lists in memory to
-speed up read/write operations. 
+speed up read/write operations.
 
-When searching for a term in the inverted index, the PersistenceManager first checks 
-the cache. If the term is not found in the cache, it is loaded from disk. This allows 
+When searching for a term in the inverted index, the PersistenceManager first checks
+the cache. If the term is not found in the cache, it is loaded from disk. This allows
 for fast access to the inverted index while minimizing disk I/O.
 ==================================================================================*/
 
@@ -121,7 +121,9 @@ func (pm *PersistenceManager) getCacheKey(term string, documentId uint64) string
 		if !found || segment.underlyng.size < 1 {
 			return currentKey
 		}
-		if segment.underlyng.tail.tracker.DocumentId <= documentId {
+		lowerBound := segment.underlyng.lowestDocumentId <= documentId
+		upperBound := segment.underlyng.highestDocumentId >= documentId
+		if lowerBound && upperBound {
 			return currentKey
 		}
 	}
