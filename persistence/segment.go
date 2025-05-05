@@ -17,6 +17,7 @@ package persistence
 
 import (
 	"iter"
+	"math"
 	"quinto/misc"
 	"unsafe"
 )
@@ -40,7 +41,7 @@ func newSegment() *segment {
 		head:              nil,
 		tail:              nil,
 		size:              0,
-		lowestDocumentId:  0,
+		lowestDocumentId:  math.MaxUint64,
 		highestDocumentId: 0,
 	}
 }
@@ -82,13 +83,13 @@ func (seg *segment) add(tracker misc.TermTracker) {
 	var insertionPoint **segmentNode = seg.getInsertionPoint(tracker)
 	var newNextNode *segmentNode = nil
 	if *insertionPoint != nil {
-		newNextNode = (*insertionPoint).next
+		newNextNode = *insertionPoint
 	}
 	*insertionPoint = &segmentNode{
 		tracker: tracker,
 		next:    newNextNode,
 	}
-	if seg.tail == nil {
+	if newNextNode == nil {
 		seg.tail = *insertionPoint
 	}
 	seg.size++
