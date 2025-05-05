@@ -63,13 +63,13 @@ func (pm *PersistenceManager) StoreNewDocument(documentId uint64, documentInputT
 		syncseg, found := pm.segments.Get(key)
 		if !found {
 			pm.mutex.Lock()
-			defer pm.mutex.Unlock()
 			syncseg, found = pm.segments.Get(key)
 			if !found {
 				syncseg = newSynchronizedSegment(nil)
 				pm.segments.Set(key, syncseg, syncseg.estimateSize())
 				pm.segments.Wait()
 			}
+			pm.mutex.Unlock()
 		}
 		syncseg.add(misc.TermTracker{
 			DocumentId: documentId,
