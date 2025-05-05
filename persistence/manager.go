@@ -60,14 +60,17 @@ func (pm *PersistenceManager) StoreNewDocument(documentId uint64, documentInputT
 			key = pm.getCacheKey(token.StemmedText, documentId)
 			segmentsForGivenTermInCurrentDocument[token.StemmedText] = key
 		}
-		pm.mutex.Lock()
 		syncseg, found := pm.segments.Get(key)
 		if !found {
-			syncseg = newSynchronizedSegment(nil)
-			pm.segments.Set(key, syncseg, syncseg.estimateSize())
-			pm.segments.Wait()
+			pm.mutex.Lock()
+			defer pm.mutex.Unlock()
+			syncseg, found = pm.segments.Get(key)
+			if !found {
+				syncseg = newSynchronizedSegment(nil)
+				pm.segments.Set(key, syncseg, syncseg.estimateSize())
+				pm.segments.Wait()
+			}
 		}
-		pm.mutex.Unlock()
 		syncseg.add(misc.TermTracker{
 			DocumentId: documentId,
 			Position:   token.Position,
@@ -118,7 +121,7 @@ func (pm *PersistenceManager) getCacheKey(term string, documentId uint64) string
 	for counter := 0; true; counter++ {
 		currentKey := fmt.Sprint(term, "_", counter)
 		segment, found := pm.segments.Get(currentKey)
-		if !found || segment.underlyng.size < 1 {
+		if !found || segment.underlyng.size == 0 {
 			return currentKey
 		}
 		lowerBound := segment.underlyng.lowestDocumentId <= documentId
