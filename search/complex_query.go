@@ -13,6 +13,15 @@ var (
 	AndQueryPolicy = func(lx, rx Match) bool { return lx.success && rx.success }
 )
 
+func NearQueryPolicy(dist int) func(lx, rx Match) bool {
+	return func(lx, rx Match) bool {
+		withinBoundsForwards := (rx.StartPosition - lx.EndPosition) <= dist
+		withinBoundsBackwards := (lx.StartPosition - rx.EndPosition) <= dist
+		withinBounds := withinBoundsForwards && withinBoundsBackwards
+		return lx.success && rx.success && withinBounds
+	}
+}
+
 func (q *ComplexQuery) Run() Match {
 	lxMatch := q.lx.Run()
 	rxMatch := q.rx.Run()
