@@ -1,3 +1,22 @@
+/*=================================== LICENSE =======================================
+
+                                   Apache License
+                             Version 2.0, January 2004
+                          http://www.apache.org/licenses/
+
+============================== BRIEF FILE DESCRIPTION ===============================
+
+An "ComplexQuery" query is a type of search query that looks for some specific
+condition encompassing two other queries. Specifically, it relies on a policy function
+that defines wether the two match results of the two queries at hand should result
+in a match or not. If you want to enforce the scenario in which matches from
+the two queries are required to be ordered such that the first match must refer
+to a term that appears before the second match in the document, you can set the
+"ord" field to true. "ComplexQuery" implements the Query interface, which defines the
+"Run", "Advance", and "Close" methods. Please refer to the documentation of the
+"Query" interface for more details about its methods and their intended usage.
+==================================================================================*/
+
 package search
 
 type ComplexQuery struct {

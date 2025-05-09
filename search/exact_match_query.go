@@ -1,3 +1,18 @@
+/*=================================== LICENSE =======================================
+
+                                   Apache License
+                             Version 2.0, January 2004
+                          http://www.apache.org/licenses/
+
+============================== BRIEF FILE DESCRIPTION ===============================
+
+An "ExactQuery" query is a type of search query that looks for an exact match of a
+term in a document. It is intended to be used as the leaf node of a query-tree for
+every structred query. "ExactQuery" implements the Query interface, which defines the
+"Run", "Advance", and "Close" methods. Please refer to the documentation of the
+"Query" interface for more details about its methods and their intended usage.
+==================================================================================*/
+
 package search
 
 import (
@@ -5,15 +20,15 @@ import (
 	"quinto/misc"
 )
 
-type Exact struct {
+type ExactQuery struct {
 	peek    func() (misc.TermTracker, bool)
 	advance func()
 	close   func()
 }
 
-func NewExactQueryFromSlice(terms []misc.TermTracker) Exact {
+func NewExactQueryFromSlice(terms []misc.TermTracker) ExactQuery {
 	index := 0
-	return Exact{
+	return ExactQuery{
 		peek: func() (misc.TermTracker, bool) {
 			if index >= len(terms) {
 				return misc.TermTracker{}, false
@@ -29,10 +44,10 @@ func NewExactQueryFromSlice(terms []misc.TermTracker) Exact {
 	}
 }
 
-func NewExactQuery(iterator iter.Seq[misc.TermTracker]) Exact {
+func NewExactQuery(iterator iter.Seq[misc.TermTracker]) ExactQuery {
 	next, stop := iter.Pull(iterator)
 	value, exists := next()
-	return Exact{
+	return ExactQuery{
 		peek: func() (misc.TermTracker, bool) {
 			return value, exists
 		},
@@ -45,7 +60,7 @@ func NewExactQuery(iterator iter.Seq[misc.TermTracker]) Exact {
 	}
 }
 
-func (q *Exact) Run() Match {
+func (q *ExactQuery) Run() Match {
 	value, exists := q.peek()
 	if !exists {
 		return Match{success: false}
@@ -58,7 +73,7 @@ func (q *Exact) Run() Match {
 	}
 }
 
-func (q *Exact) Close() {
+func (q *ExactQuery) Close() {
 	if q.close != nil {
 		q.close()
 		q.peek = nil
@@ -67,11 +82,11 @@ func (q *Exact) Close() {
 	}
 }
 
-func (q *Exact) Advance() {
+func (q *ExactQuery) Advance() {
 	q.advance()
 }
 
-func (q *Exact) lowestDocumentId() uint64 {
+func (q *ExactQuery) lowestDocumentId() uint64 {
 	value, exists := q.peek()
 	if !exists {
 		return 0
