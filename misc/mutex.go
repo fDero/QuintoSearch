@@ -1,3 +1,25 @@
+/*=================================== LICENSE =======================================
+
+                                   Apache License
+                             Version 2.0, January 2004
+                          http://www.apache.org/licenses/
+
+============================== BRIEF FILE DESCRIPTION ===============================
+
+This files contains the definition of "ReadWriteMutex" which describes a mutex that
+behaves differently for readers and writers of a particular resource. Keep in mind
+that reads can be performed concurrently, while writes are exclusive.
+
+The "WritersFirstRWMutex" is a particular implementation of the "ReadWriteMutex"
+interface that prioritizes writers over readers. It is designed to ensure that when a
+write operation is pending, all read operations are blocked until the write operation
+is completed. This is useful in scenarios where write operations are more critical
+than read operations, and we want to minimize the time that writers have to wait
+for readers to finish. Usually, writers are fewer than readers, and we want to keep
+it that way by making sure that writers are not blocked by readers, hence they don't
+pile up. In a databse context, we expect more reads than writes.
+==================================================================================*/
+
 package misc
 
 import (
