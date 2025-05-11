@@ -9,9 +9,9 @@
 This file contains the implementation of the ParseQuery function, which is responsible
 for translating a sequence of fragments into a well-formed query (a tree-like structure).
 
-The parsing itself is done using a stack-based approach, where operators and operands 
+The parsing itself is done using a stack-based approach, where operators and operands
 are pushed onto their respective stacks. The precedence of operators is taken into
-account to ensure that the resulting query structure is correct.  
+account to ensure that the resulting query structure is correct.
 ==================================================================================*/
 
 package search
@@ -90,6 +90,7 @@ func ParseQuery(queryFragments []QueryFragment) (Query, error) {
 			stackPush(&opStack, castedAsAny)
 			stackPush(&precedenceStack, 0)
 		case "OR":
+			evaluateAll(parsingState, 1)
 			var castedAsAny any = ComplexQuery{ord: fragment.ord, policy: OrQueryPolicy}
 			stackPush(&opStack, castedAsAny)
 			stackPush(&precedenceStack, 1)

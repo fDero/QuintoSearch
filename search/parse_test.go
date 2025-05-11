@@ -5,6 +5,8 @@ import (
 )
 
 func TestParseExactQuery(t *testing.T) {
+
+	// a [exact match]
 	fragments := []QueryFragment{
 		{"a", false, 0},
 	}
@@ -20,6 +22,8 @@ func TestParseExactQuery(t *testing.T) {
 }
 
 func TestParseAndQuery(t *testing.T) {
+
+	// a AND b
 	fragments := []QueryFragment{
 		{"a", false, 0},
 		{"AND", false, 0},
@@ -38,7 +42,7 @@ func TestParseAndQuery(t *testing.T) {
 
 func TestParseOrThenAndQuery(t *testing.T) {
 
-	// a OR (b AND c)
+	// a OR [b AND c]
 	fragments := []QueryFragment{
 		{"a", false, 0},
 		{"OR", false, 0},
@@ -58,5 +62,138 @@ func TestParseOrThenAndQuery(t *testing.T) {
 
 	if term := query.(*ComplexQuery).lx.(*ExactQuery).term; term != "a" {
 		t.Errorf("Expected complex query with exact match 'a' on the right, got something else: %v", term)
+	}
+}
+
+func TestParseAndThenOrQuery(t *testing.T) {
+
+	// [a AND b] OR c
+	fragments := []QueryFragment{
+		{"a", false, 0},
+		{"AND", false, 0},
+		{"b", false, 0},
+		{"OR", false, 0},
+		{"c", false, 0},
+	}
+
+	query, err := ParseQuery(fragments)
+	if err != nil {
+		t.Fatalf("ParseQuery failed: %v", err)
+	}
+
+	if term := query.(*ComplexQuery).rx.(*ExactQuery).term; term != "c" {
+		t.Errorf("Expected complex query with exact match 'c' on the right, got something else: %v", term)
+	}
+
+	if query.(*ComplexQuery).lx.(*ComplexQuery) == nil {
+		t.Errorf("Expected complex query with complex query on the right, got something else")
+	}
+}
+
+func TestParseUselessParenAndThenOrQuery(t *testing.T) {
+
+	// (a AND b) OR c
+	fragments := []QueryFragment{
+		{"(", false, 0},
+		{"a", false, 0},
+		{"AND", false, 0},
+		{"b", false, 0},
+		{")", false, 0},
+		{"OR", false, 0},
+		{"c", false, 0},
+	}
+
+	query, err := ParseQuery(fragments)
+	if err != nil {
+		t.Fatalf("ParseQuery failed: %v", err)
+	}
+
+	if term := query.(*ComplexQuery).rx.(*ExactQuery).term; term != "c" {
+		t.Errorf("Expected complex query with exact match 'c' on the right, got something else: %v", term)
+	}
+
+	if query.(*ComplexQuery).lx.(*ComplexQuery) == nil {
+		t.Errorf("Expected complex query with complex query on the right, got something else")
+	}
+}
+
+func TestParseUsefulParenAndThenOrQuery(t *testing.T) {
+
+	// a AND (b OR c)
+	fragments := []QueryFragment{
+		{"a", false, 0},
+		{"AND", false, 0},
+		{"(", false, 0},
+		{"b", false, 0},
+		{"OR", false, 0},
+		{"c", false, 0},
+		{")", false, 0},
+	}
+
+	query, err := ParseQuery(fragments)
+	if err != nil {
+		t.Fatalf("ParseQuery failed: %v", err)
+	}
+
+	if term := query.(*ComplexQuery).lx.(*ExactQuery).term; term != "a" {
+		t.Errorf("Expected complex query with exact match 'a' on the right, got something else: %v", term)
+	}
+
+	if query.(*ComplexQuery).rx.(*ComplexQuery) == nil {
+		t.Errorf("Expected complex query with complex query on the right, got something else")
+	}
+}
+
+func TestParseUselessParenOrThenAndQuery(t *testing.T) {
+
+	// (a OR b) AND c
+	fragments := []QueryFragment{
+		{"(", false, 0},
+		{"a", false, 0},
+		{"AND", false, 0},
+		{"b", false, 0},
+		{")", false, 0},
+		{"OR", false, 0},
+		{"c", false, 0},
+	}
+
+	query, err := ParseQuery(fragments)
+	if err != nil {
+		t.Fatalf("ParseQuery failed: %v", err)
+	}
+
+	if term := query.(*ComplexQuery).rx.(*ExactQuery).term; term != "c" {
+		t.Errorf("Expected complex query with exact match 'c' on the right, got something else: %v", term)
+	}
+
+	if query.(*ComplexQuery).lx.(*ComplexQuery) == nil {
+		t.Errorf("Expected complex query with complex query on the right, got something else")
+	}
+}
+
+func TestParseUsefulParenOrThenAndQuery(t *testing.T) {
+
+	// a OR (b AND c)
+	fragments := []QueryFragment{
+		{"a", false, 0},
+		{"OR", false, 0},
+		{"(", false, 0},
+		{"b", false, 0},
+		{"AND", false, 0},
+		{"c", false, 0},
+		{")", false, 0},
+	}
+
+	query, err := ParseQuery(fragments)
+	if err != nil {
+		t.Fatalf("ParseQuery failed: %v", err)
+	}
+
+	if term := query.(*ComplexQuery).lx.(*ExactQuery).term; term != "a" {
+		t.Errorf("Expected complex query with exact match 'a' on the right, got something else: %v", term)
+	}
+
+	if query.(*ComplexQuery).rx.(*ComplexQuery) == nil {
+		t.Errorf("Expected complex query with complex query on the right, got something else")
 	}
 }
