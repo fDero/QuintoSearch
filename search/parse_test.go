@@ -7,7 +7,7 @@ import (
 func TestParseExactQuery(t *testing.T) {
 
 	// a [exact match]
-	fragments := []QueryFragment{
+	fragments := []queryFragment{
 		{"a", false, 0},
 	}
 
@@ -24,7 +24,7 @@ func TestParseExactQuery(t *testing.T) {
 func TestParseAndQuery(t *testing.T) {
 
 	// a AND b
-	fragments := []QueryFragment{
+	fragments := []queryFragment{
 		{"a", false, 0},
 		{"AND", false, 0},
 		{"b", false, 0},
@@ -43,7 +43,7 @@ func TestParseAndQuery(t *testing.T) {
 func TestParseOrThenAndQuery(t *testing.T) {
 
 	// a OR [b AND c]
-	fragments := []QueryFragment{
+	fragments := []queryFragment{
 		{"a", false, 0},
 		{"OR", false, 0},
 		{"b", false, 0},
@@ -68,7 +68,7 @@ func TestParseOrThenAndQuery(t *testing.T) {
 func TestParseAndThenOrQuery(t *testing.T) {
 
 	// [a AND b] OR c
-	fragments := []QueryFragment{
+	fragments := []queryFragment{
 		{"a", false, 0},
 		{"AND", false, 0},
 		{"b", false, 0},
@@ -93,7 +93,7 @@ func TestParseAndThenOrQuery(t *testing.T) {
 func TestParseUselessParenAndThenOrQuery(t *testing.T) {
 
 	// (a AND b) OR c
-	fragments := []QueryFragment{
+	fragments := []queryFragment{
 		{"(", false, 0},
 		{"a", false, 0},
 		{"AND", false, 0},
@@ -120,7 +120,7 @@ func TestParseUselessParenAndThenOrQuery(t *testing.T) {
 func TestParseUsefulParenAndThenOrQuery(t *testing.T) {
 
 	// a AND (b OR c)
-	fragments := []QueryFragment{
+	fragments := []queryFragment{
 		{"a", false, 0},
 		{"AND", false, 0},
 		{"(", false, 0},
@@ -147,7 +147,7 @@ func TestParseUsefulParenAndThenOrQuery(t *testing.T) {
 func TestParseUselessParenOrThenAndQuery(t *testing.T) {
 
 	// (a OR b) AND c
-	fragments := []QueryFragment{
+	fragments := []queryFragment{
 		{"(", false, 0},
 		{"a", false, 0},
 		{"AND", false, 0},
@@ -174,7 +174,7 @@ func TestParseUselessParenOrThenAndQuery(t *testing.T) {
 func TestParseUsefulParenOrThenAndQuery(t *testing.T) {
 
 	// a OR (b AND c)
-	fragments := []QueryFragment{
+	fragments := []queryFragment{
 		{"a", false, 0},
 		{"OR", false, 0},
 		{"(", false, 0},

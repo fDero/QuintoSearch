@@ -20,12 +20,6 @@ import (
 	"fmt"
 )
 
-type QueryFragment struct {
-	txt string
-	ord bool
-	opt int
-}
-
 type parsingState struct {
 	queryStack      *[]Query
 	opStack         *[]any
@@ -72,7 +66,7 @@ func evaluateAll(state parsingState, currentPrecedence int) {
 	}
 }
 
-func ParseQuery(queryFragments []QueryFragment) (Query, error) {
+func ParseQuery(queryFragments []queryFragment) (Query, error) {
 
 	var queryStack []Query
 	var opStack []any
