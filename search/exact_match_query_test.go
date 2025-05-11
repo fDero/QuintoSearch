@@ -8,6 +8,7 @@ import (
 func TestExactMatchQuerySuccess(t *testing.T) {
 
 	query := ExactQuery{
+		"test",
 		func() (misc.TermTracker, bool) {
 			return misc.TermTracker{DocumentId: 1, Position: 0}, true
 		},

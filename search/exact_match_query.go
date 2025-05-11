@@ -21,6 +21,7 @@ import (
 )
 
 type ExactQuery struct {
+	term    string
 	peek    func() (misc.TermTracker, bool)
 	advance func()
 	close   func()
@@ -58,6 +59,13 @@ func NewExactQuery(iterator iter.Seq[misc.TermTracker]) ExactQuery {
 			stop()
 		},
 	}
+}
+
+func (q *ExactQuery) Init(index misc.ReverseIndex) {
+	tmp := NewExactQuery(index.IterateOverTerms(q.term))
+	q.peek = tmp.peek
+	q.advance = tmp.advance
+	q.close = tmp.close
 }
 
 func (q *ExactQuery) Run() Match {

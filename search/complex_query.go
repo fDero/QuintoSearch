@@ -19,6 +19,10 @@ to a term that appears before the second match in the document, you can set the
 
 package search
 
+import (
+	"quinto/misc"
+)
+
 type ComplexQuery struct {
 	lx     Query
 	rx     Query
@@ -39,6 +43,11 @@ func NearQueryPolicy(dist int) func(lx, rx Match) bool {
 		withinBounds := withinBoundsForwards && withinBoundsBackwards
 		return lx.success && rx.success && withinBounds
 	}
+}
+
+func (q *ComplexQuery) Init(index misc.ReverseIndex) {
+	q.lx.Init(index)
+	q.rx.Init(index)
 }
 
 func (q *ComplexQuery) Run() Match {
