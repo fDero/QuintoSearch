@@ -20,7 +20,6 @@ package misc
 
 import (
 	"iter"
-	"sync/atomic"
 )
 
 type Token struct {
@@ -37,39 +36,4 @@ type TermTracker struct {
 type ReverseIndex interface {
 	IterateOverTerms(term string) iter.Seq[TermTracker]
 	StoreNewDocument(toks iter.Seq[Token]) (uint64, error)
-}
-
-type NaiveReverseIndex struct {
-	terms     map[string][]TermTracker
-	IdCounter atomic.Uint64
-}
-
-func NewNaiveReverseIndex() *NaiveReverseIndex {
-	return &NaiveReverseIndex{
-		terms:     make(map[string][]TermTracker),
-		IdCounter: atomic.Uint64{},
-	}
-}
-
-func (q *NaiveReverseIndex) IterateOverTerms(term string) iter.Seq[TermTracker] {
-	return func(yield func(TermTracker) bool) {
-		termTrackers, exists := q.terms[term]
-		if !exists {
-			return
-		}
-		for _, termTracker := range termTrackers {
-			if !yield(termTracker) {
-				return
-			}
-		}
-	}
-}
-
-func (q *NaiveReverseIndex) StoreNewDocument(toks iter.Seq[Token]) (uint64, error) {
-	id := q.IdCounter.Add(1)
-	for tok := range toks {
-		newTracker := TermTracker{DocumentId: id, Position: tok.Position}
-		q.terms[tok.StemmedText] = append(q.terms[tok.StemmedText], newTracker)
-	}
-	return id, nil
 }

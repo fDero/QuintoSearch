@@ -6,11 +6,6 @@ import (
 	"testing"
 )
 
-var helloWorldDocument = []misc.Token{
-	{StemmedText: "hello", OriginalText: "hello", Position: 0},
-	{StemmedText: "world", OriginalText: "world", Position: 1},
-}
-
 func TestDocumentIteration(t *testing.T) {
 	documentIterator := misc.NewSliceIterator(helloWorldDocument)
 	next, close := iter.Pull(documentIterator)
@@ -23,7 +18,7 @@ func TestDocumentIteration(t *testing.T) {
 
 func TestTermIteration(t *testing.T) {
 	documentIterator := misc.NewSliceIterator(helloWorldDocument)
-	index := misc.NewNaiveReverseIndex()
+	index := NewNaiveReverseIndex()
 	index.StoreNewDocument(documentIterator)
 	termIterator := index.IterateOverTerms("hello")
 	next, close := iter.Pull(termIterator)
@@ -35,7 +30,7 @@ func TestTermIteration(t *testing.T) {
 }
 
 func runTestQueryHelper(t *testing.T, queryString string, success bool) {
-	index := misc.NewNaiveReverseIndex()
+	index := NewNaiveReverseIndex()
 	tokenIterator := misc.NewSliceIterator(helloWorldDocument)
 	index.StoreNewDocument(tokenIterator)
 
@@ -57,21 +52,21 @@ func TestSearchOverallForOneWord(t *testing.T) {
 }
 
 func TestSearchOverallForTwoWordSuccess(t *testing.T) {
-	index := misc.NewNaiveReverseIndex()
+	index := NewNaiveReverseIndex()
 	tokenIterator := misc.NewSliceIterator(helloWorldDocument)
 	index.StoreNewDocument(tokenIterator)
 	runTestQueryHelper(t, "hello AND world", true)
 }
 
 func TestTermIterationFailure(t *testing.T) {
-	index := misc.NewNaiveReverseIndex()
+	index := NewNaiveReverseIndex()
 	tokenIterator := misc.NewSliceIterator(helloWorldDocument)
 	index.StoreNewDocument(tokenIterator)
 	runTestQueryHelper(t, "guitar", false)
 }
 
 func TestSearchOverallForTwoWordFailure(t *testing.T) {
-	index := misc.NewNaiveReverseIndex()
+	index := NewNaiveReverseIndex()
 	tokenIterator := misc.NewSliceIterator(helloWorldDocument)
 	index.StoreNewDocument(tokenIterator)
 	runTestQueryHelper(t, "guitar AND world", false)
