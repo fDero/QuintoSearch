@@ -14,8 +14,9 @@ type Match struct {
 type Query interface {
 	Run() Match
 	Advance()
+	Ended() bool
 	Close()
 	Init(misc.ReverseIndex)
 
-	lowestDocumentId() uint64
+	coordinates() (uint64, int)
 }

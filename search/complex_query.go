@@ -89,11 +89,21 @@ func (q *ComplexQuery) Run() Match {
 }
 
 func (q *ComplexQuery) Advance() {
-	if q.lx.lowestDocumentId() < q.rx.lowestDocumentId() {
+	lxDocumentId, lxPosition := q.lx.coordinates()
+	rxDocumentId, rxPosition := q.rx.coordinates()
+	shouldGoLxByDocumentId := lxDocumentId < rxDocumentId
+	shouldGoLxByPosition := lxDocumentId == rxDocumentId && lxPosition < rxPosition
+	shouldGoLx := shouldGoLxByDocumentId || shouldGoLxByPosition
+	canGoLx := !q.lx.Ended()
+	if shouldGoLx && canGoLx {
 		q.lx.Advance()
 	} else {
 		q.rx.Advance()
 	}
+}
+
+func (q *ComplexQuery) Ended() bool {
+	return q.lx.Ended() && q.rx.Ended()
 }
 
 func (q *ComplexQuery) Close() {
@@ -101,9 +111,14 @@ func (q *ComplexQuery) Close() {
 	q.rx.Close()
 }
 
-func (q *ComplexQuery) lowestDocumentId() uint64 {
-	return min(
-		q.lx.lowestDocumentId(),
-		q.rx.lowestDocumentId(),
-	)
+func (q *ComplexQuery) coordinates() (uint64, int) {
+	lxDocumentId, lxPosition := q.lx.coordinates()
+	rxDocumentId, rxPosition := q.rx.coordinates()
+	if lxDocumentId < rxDocumentId {
+		return lxDocumentId, lxPosition
+	}
+	if lxDocumentId == rxDocumentId && lxPosition < rxPosition {
+		return lxDocumentId, lxPosition
+	}
+	return rxDocumentId, rxPosition
 }

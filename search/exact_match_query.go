@@ -94,10 +94,15 @@ func (q *ExactQuery) Advance() {
 	q.advance()
 }
 
-func (q *ExactQuery) lowestDocumentId() uint64 {
+func (q *ExactQuery) Ended() bool {
+	_, exists := q.peek()
+	return !exists
+}
+
+func (q *ExactQuery) coordinates() (uint64, int) {
 	value, exists := q.peek()
 	if !exists {
-		return 0
+		return 0, -1
 	}
-	return value.DocumentId
+	return value.DocumentId, value.Position
 }
