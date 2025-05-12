@@ -44,10 +44,17 @@ type NaiveReverseIndex struct {
 	IdCounter atomic.Uint64
 }
 
+func NewNaiveReverseIndex() *NaiveReverseIndex {
+	return &NaiveReverseIndex{
+		terms:     make(map[string][]TermTracker),
+		IdCounter: atomic.Uint64{},
+	}
+}
+
 func (q *NaiveReverseIndex) IterateOverTerms(term string) iter.Seq[TermTracker] {
 	return func(yield func(TermTracker) bool) {
 		termTrackers, exists := q.terms[term]
-		if exists {
+		if !exists {
 			return
 		}
 		for _, termTracker := range termTrackers {
