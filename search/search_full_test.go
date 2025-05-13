@@ -24,7 +24,15 @@ func runTestCollectMatchesHelper(t *testing.T, queryString string) []Match {
 
 	query.Init(index)
 
+	counter := 0
 	for !query.Ended() {
+		if counter > 300 {
+			t.Fatalf("Infinite loop detected in query execution")
+		}
+		counter++
+		t.Logf("Running query: %s", query)
+		doc, pos := query.coordinates()
+		t.Logf("Current query: %v %v", doc, pos)
 		queryResult := query.Run()
 		if queryResult.success {
 			results = append(results, queryResult)
@@ -46,5 +54,12 @@ func TestSecondComplexQueryOverMultipleDocuments(t *testing.T) {
 	matches := runTestCollectMatchesHelper(t, "guitar AND music")
 	if len(matches) != 1 {
 		t.Errorf("Expected 1 match, got %d", len(matches))
+	}
+}
+
+func TestThirdComplexQueryOverMultipleDocuments(t *testing.T) {
+	matches := runTestCollectMatchesHelper(t, "guitar OR music")
+	if len(matches) != 2 {
+		t.Errorf("Expected 2 match, got %d", len(matches))
 	}
 }

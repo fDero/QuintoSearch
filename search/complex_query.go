@@ -97,7 +97,8 @@ func (q *ComplexQuery) Advance() {
 	canGoLx := !q.lx.Ended()
 	if shouldGoLx && canGoLx {
 		q.lx.Advance()
-	} else {
+	}
+	if !shouldGoLx || !canGoLx || !q.rx.Ended() {
 		q.rx.Advance()
 	}
 }
