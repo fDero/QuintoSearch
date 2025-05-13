@@ -1,6 +1,6 @@
 module quinto
 
-go 1.23.3
+go 1.24.2
 
 // github.com/spf13/cobra: CLI command/argument parser
 require (
