@@ -94,12 +94,14 @@ func (q *ComplexQuery) Advance() {
 	shouldGoLxByDocumentId := lxDocumentId < rxDocumentId
 	shouldGoLxByPosition := lxDocumentId == rxDocumentId && lxPosition < rxPosition
 	shouldGoLx := shouldGoLxByDocumentId || shouldGoLxByPosition
-	canGoLx := !q.lx.Ended()
-	if shouldGoLx && canGoLx {
+	if shouldGoLx && !q.lx.Ended() {
 		q.lx.Advance()
 	}
-	if !shouldGoLx || !canGoLx || !q.rx.Ended() {
+	if !shouldGoLx || q.lx.Ended() {
 		q.rx.Advance()
+	}
+	if !shouldGoLx && !q.lx.Ended() && q.rx.Ended() {
+		q.lx.Advance()
 	}
 }
 
