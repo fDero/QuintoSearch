@@ -42,7 +42,7 @@ func runTestQueryHelper(t *testing.T, queryString string, success bool) {
 
 	query.Init(index)
 	queryResult := query.Run()
-	if queryResult.success != success {
+	if queryResult.Success != success {
 		t.Errorf("Expected success to be true, got false")
 	}
 }

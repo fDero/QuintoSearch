@@ -18,7 +18,7 @@ func TestExactMatchQuerySuccess(t *testing.T) {
 
 	match := query.Run()
 
-	if !match.success {
+	if !match.Success {
 		t.Errorf("Expected success to be true, got false")
 	}
 	if match.DocumentId != 1 {

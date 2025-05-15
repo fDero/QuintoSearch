@@ -18,7 +18,7 @@ func TestAndQuerySuccess(t *testing.T) {
 	}
 
 	match := andQuery.Run()
-	if !match.success {
+	if !match.Success {
 		t.Errorf("Expected success to be true, got false")
 	}
 }
@@ -36,7 +36,7 @@ func TestAndQueryFailureByIdMismatch(t *testing.T) {
 	}
 
 	match := andQuery.Run()
-	if match.success {
+	if match.Success {
 		t.Errorf("Expected success to be false, got true")
 	}
 }
@@ -54,7 +54,7 @@ func TestAndQueryFailureByPolicy(t *testing.T) {
 	}
 
 	match := andQuery.Run()
-	if match.success {
+	if match.Success {
 		t.Errorf("Expected success to be false, got true")
 	}
 }

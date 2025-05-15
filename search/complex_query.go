@@ -31,9 +31,9 @@ type ComplexQuery struct {
 }
 
 var (
-	OrQueryPolicy  = func(lx, rx Match) bool { return lx.success || rx.success }
-	XorQueryPolicy = func(lx, rx Match) bool { return lx.success != rx.success }
-	AndQueryPolicy = func(lx, rx Match) bool { return lx.success && rx.success }
+	OrQueryPolicy  = func(lx, rx Match) bool { return lx.Success || rx.Success }
+	XorQueryPolicy = func(lx, rx Match) bool { return lx.Success != rx.Success }
+	AndQueryPolicy = func(lx, rx Match) bool { return lx.Success && rx.Success }
 )
 
 func NearQueryPolicy(dist int) func(lx, rx Match) bool {
@@ -41,7 +41,7 @@ func NearQueryPolicy(dist int) func(lx, rx Match) bool {
 		withinBoundsForwards := (rx.StartPosition - lx.EndPosition) <= dist
 		withinBoundsBackwards := (lx.StartPosition - rx.EndPosition) <= dist
 		withinBounds := withinBoundsForwards && withinBoundsBackwards
-		return lx.success && rx.success && withinBounds
+		return lx.Success && rx.Success && withinBounds
 	}
 }
 
@@ -54,13 +54,13 @@ func (q *ComplexQuery) Run() Match {
 	lxMatch := q.lx.Run()
 	rxMatch := q.rx.Run()
 	if !q.policy(lxMatch, rxMatch) {
-		return Match{success: false}
+		return Match{Success: false}
 	}
 
-	if lxMatch.success && rxMatch.success {
+	if lxMatch.Success && rxMatch.Success {
 
 		if lxMatch.DocumentId != rxMatch.DocumentId {
-			return Match{success: false}
+			return Match{Success: false}
 		}
 
 		success := true
@@ -70,22 +70,22 @@ func (q *ComplexQuery) Run() Match {
 		}
 
 		return Match{
-			success:       success,
+			Success:       success,
 			DocumentId:    lxMatch.DocumentId,
 			StartPosition: lxMatch.StartPosition,
 			EndPosition:   rxMatch.EndPosition,
 		}
 	}
 
-	if lxMatch.success {
+	if lxMatch.Success {
 		return lxMatch
 	}
 
-	if rxMatch.success {
+	if rxMatch.Success {
 		return rxMatch
 	}
 
-	return Match{success: true}
+	return Match{Success: true}
 }
 
 func (q *ComplexQuery) Advance() {

@@ -31,7 +31,7 @@ func runTestCollectMatchesHelper(t *testing.T, queryString string) []Match {
 		}
 		counter++
 		queryResult := query.Run()
-		if queryResult.success {
+		if queryResult.Success {
 			results = append(results, queryResult)
 		}
 		query.Advance()

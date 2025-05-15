@@ -71,10 +71,10 @@ func (q *ExactQuery) Init(index misc.ReverseIndex) {
 func (q *ExactQuery) Run() Match {
 	value, exists := q.peek()
 	if !exists {
-		return Match{success: false}
+		return Match{Success: false}
 	}
 	return Match{
-		success:       true,
+		Success:       true,
 		DocumentId:    value.DocumentId,
 		StartPosition: value.Position,
 		EndPosition:   value.Position,

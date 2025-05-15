@@ -5,7 +5,7 @@ import (
 )
 
 type Match struct {
-	success       bool
+	Success       bool
 	DocumentId    uint64
 	StartPosition int
 	EndPosition   int

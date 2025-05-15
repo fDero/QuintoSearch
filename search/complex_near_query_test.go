@@ -18,7 +18,7 @@ func TestNearQuerySuccess(t *testing.T) {
 	}
 
 	match := nearQuery.Run()
-	if !match.success {
+	if !match.Success {
 		t.Errorf("Expected success to be true, got false")
 	}
 }
@@ -36,7 +36,7 @@ func TestNearQuerySuccessReverse(t *testing.T) {
 	}
 
 	match := andQuery.Run()
-	if !match.success {
+	if !match.Success {
 		t.Errorf("Expected success to be true, got false")
 	}
 }
@@ -54,7 +54,7 @@ func TestOrderedNearQueryFailureByWrongOrder(t *testing.T) {
 	}
 
 	match := andQuery.Run()
-	if match.success {
+	if match.Success {
 		t.Errorf("Expected success to be false, got true")
 	}
 }
@@ -72,7 +72,7 @@ func TestNearQueryFailureByExcessiveDistance(t *testing.T) {
 	}
 
 	match := andQuery.Run()
-	if match.success {
+	if match.Success {
 		t.Errorf("Expected success to be false, got true")
 	}
 }
@@ -90,7 +90,7 @@ func TestNearQueryFailureByExcessiveDistanceReverse(t *testing.T) {
 	}
 
 	match := andQuery.Run()
-	if match.success {
+	if match.Success {
 		t.Errorf("Expected success to be false, got true")
 	}
 }
