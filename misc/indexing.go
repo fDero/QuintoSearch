@@ -22,23 +22,27 @@ import (
 	"iter"
 )
 
+type DocumentId uint64
+
+type TermPosition uint64
+
 type FatToken struct {
 	StemmedText  string
 	OriginalText string
-	Position     int
+	Position     TermPosition
 }
 
 type Token struct {
-	StemmedText  string
-	Position     int
+	StemmedText string
+	Position    TermPosition
 }
 
 type TermTracker struct {
-	DocumentId uint64
-	Position   int
+	DocId    DocumentId
+	Position TermPosition
 }
 
 type ReverseIndex interface {
 	IterateOverTerms(term string) iter.Seq[TermTracker]
-	StoreNewDocument(toks iter.Seq[Token]) (uint64, error)
+	StoreNewDocument(toks iter.Seq[Token]) (DocumentId, error)
 }

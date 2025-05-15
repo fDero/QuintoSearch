@@ -27,8 +27,8 @@ type segment struct {
 	tail *segmentNode
 
 	size              uint64
-	lowestDocumentId  uint64
-	highestDocumentId uint64
+	lowestDocumentId  misc.DocumentId
+	highestDocumentId misc.DocumentId
 }
 
 type segmentNode struct {
@@ -69,8 +69,8 @@ func (seg *segment) iterator() iter.Seq[misc.TermTracker] {
 func (seg *segment) getInsertionPoint(tracker misc.TermTracker) **segmentNode {
 	var insertionPoint **segmentNode = nil
 	for insertionPoint = &seg.head; *insertionPoint != nil; insertionPoint = &((*insertionPoint).next) {
-		overshootByDocumentId := (*insertionPoint).tracker.DocumentId > tracker.DocumentId
-		onExactDocumentId := (*insertionPoint).tracker.DocumentId == tracker.DocumentId
+		overshootByDocumentId := (*insertionPoint).tracker.DocId > tracker.DocId
+		onExactDocumentId := (*insertionPoint).tracker.DocId == tracker.DocId
 		overshootByPosition := onExactDocumentId && (*insertionPoint).tracker.Position > tracker.Position
 		if overshootByDocumentId || overshootByPosition {
 			break
@@ -93,6 +93,6 @@ func (seg *segment) add(tracker misc.TermTracker) {
 		seg.tail = *insertionPoint
 	}
 	seg.size++
-	seg.highestDocumentId = max(seg.highestDocumentId, tracker.DocumentId)
-	seg.lowestDocumentId = min(seg.lowestDocumentId, tracker.DocumentId)
+	seg.highestDocumentId = max(seg.highestDocumentId, tracker.DocId)
+	seg.lowestDocumentId = min(seg.lowestDocumentId, tracker.DocId)
 }

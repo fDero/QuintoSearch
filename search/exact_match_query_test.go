@@ -10,7 +10,7 @@ func TestExactMatchQuerySuccess(t *testing.T) {
 	query := ExactQuery{
 		"test",
 		func() (misc.TermTracker, bool) {
-			return misc.TermTracker{DocumentId: 1, Position: 0}, true
+			return misc.TermTracker{DocId: 1, Position: 0}, true
 		},
 		func() {},
 		func() {},
@@ -21,8 +21,8 @@ func TestExactMatchQuerySuccess(t *testing.T) {
 	if !match.Success {
 		t.Errorf("Expected success to be true, got false")
 	}
-	if match.DocumentId != 1 {
-		t.Errorf("Expected DocumentId to be 1, got %d", match.DocumentId)
+	if match.DocId != 1 {
+		t.Errorf("Expected DocumentId to be 1, got %d", match.DocId)
 	}
 	if match.StartPosition != 0 {
 		t.Errorf("Expected StartPosition to be 0, got %d", match.StartPosition)

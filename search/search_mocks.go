@@ -40,8 +40,8 @@ func createDummyDocument(tokens []string) []misc.Token {
 	out := []misc.Token{}
 	for i, token := range tokens {
 		out = append(out, misc.Token{
-			StemmedText:  token,
-			Position:     i,
+			StemmedText: token,
+			Position:    misc.TermPosition(i),
 		})
 	}
 	return out
@@ -73,10 +73,10 @@ func (q *NaiveReverseIndex) IterateOverTerms(term string) iter.Seq[misc.TermTrac
 	}
 }
 
-func (q *NaiveReverseIndex) StoreNewDocument(toks iter.Seq[misc.Token]) (uint64, error) {
-	id := q.IdCounter.Add(1)
+func (q *NaiveReverseIndex) StoreNewDocument(toks iter.Seq[misc.Token]) (misc.DocumentId, error) {
+	id := misc.DocumentId(q.IdCounter.Add(1))
 	for tok := range toks {
-		newTracker := misc.TermTracker{DocumentId: id, Position: tok.Position}
+		newTracker := misc.TermTracker{DocId: id, Position: tok.Position}
 		q.terms[tok.StemmedText] = append(q.terms[tok.StemmedText], newTracker)
 	}
 	return id, nil

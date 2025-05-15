@@ -6,9 +6,9 @@ import (
 
 type Match struct {
 	Success        bool
-	DocumentId     uint64
-	StartPosition  int
-	EndPosition    int
+	DocId          misc.DocumentId
+	StartPosition  misc.TermPosition
+	EndPosition    misc.TermPosition
 	InvolvedTokens misc.Set[misc.Token]
 }
 
@@ -19,5 +19,5 @@ type Query interface {
 	Close()
 	Init(misc.ReverseIndex)
 
-	coordinates() (uint64, int)
+	coordinates() (misc.DocumentId, misc.TermPosition)
 }

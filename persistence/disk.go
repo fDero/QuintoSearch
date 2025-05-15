@@ -22,11 +22,11 @@ import (
 )
 
 func StoreOnDisk(fileWriter *bufio.Writer, invertedList *segment) error {
-	lastDocumentId := uint64(0)
-	lastPosition := 0
+	lastDocumentId := misc.DocumentId(0)
+	lastPosition := misc.TermPosition(0)
 	for tracker := range invertedList.iterator() {
 
-		documentIdDelta := tracker.DocumentId - lastDocumentId
+		documentIdDelta := tracker.DocId - lastDocumentId
 		positionDelta := tracker.Position - lastPosition
 
 		positionToEncode := positionDelta
@@ -44,7 +44,7 @@ func StoreOnDisk(fileWriter *bufio.Writer, invertedList *segment) error {
 			return err
 		}
 
-		lastDocumentId = tracker.DocumentId
+		lastDocumentId = tracker.DocId
 		lastPosition = tracker.Position
 	}
 	return nil
@@ -53,8 +53,8 @@ func StoreOnDisk(fileWriter *bufio.Writer, invertedList *segment) error {
 func LoadFromDisk(fileReader *bufio.Reader) (*segment, error) {
 	var invertedList *segment = newSegment()
 
-	documentId := uint64(0)
-	position := 0
+	documentId := misc.DocumentId(0)
+	position := misc.TermPosition(0)
 
 	for {
 		encodedDocumentIdDelta, idErr := loadVbyteEncodedUInt64(fileReader)
@@ -70,19 +70,19 @@ func LoadFromDisk(fileReader *bufio.Reader) (*segment, error) {
 			return invertedList, posErr
 		}
 
-		documentIdDelta := vbyteDecodeUInt64(encodedDocumentIdDelta)
+		documentIdDelta := misc.DocumentId(vbyteDecodeUInt64(encodedDocumentIdDelta))
 		positionMaybeDeltaMaybeAbsolute := vbyteDecodeUInt64(encodedPositionMaybeDeltaMaybeAbsolute)
 
 		documentId += documentIdDelta
 		if documentIdDelta == 0 {
-			position += int(positionMaybeDeltaMaybeAbsolute)
+			position += misc.TermPosition(positionMaybeDeltaMaybeAbsolute)
 		} else {
-			position = int(positionMaybeDeltaMaybeAbsolute)
+			position = misc.TermPosition(positionMaybeDeltaMaybeAbsolute)
 		}
 
 		invertedList.add(misc.TermTracker{
-			DocumentId: documentId,
-			Position:   position,
+			DocId:    documentId,
+			Position: position,
 		})
 	}
 }

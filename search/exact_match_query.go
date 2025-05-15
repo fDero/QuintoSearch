@@ -82,7 +82,7 @@ func (q *ExactQuery) Run() Match {
 
 	return Match{
 		Success:        true,
-		DocumentId:     value.DocumentId,
+		DocId:          value.DocId,
 		StartPosition:  value.Position,
 		EndPosition:    value.Position,
 		InvolvedTokens: involvedTokens,
@@ -107,10 +107,10 @@ func (q *ExactQuery) Ended() bool {
 	return !exists
 }
 
-func (q *ExactQuery) coordinates() (uint64, int) {
+func (q *ExactQuery) coordinates() (misc.DocumentId, misc.TermPosition) {
 	value, exists := q.peek()
 	if !exists {
-		return 0, -1
+		return 0, 0
 	}
-	return value.DocumentId, value.Position
+	return value.DocId, value.Position
 }

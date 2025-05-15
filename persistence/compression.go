@@ -31,7 +31,7 @@ import (
 	"slices"
 )
 
-func vbyteEncodeUInt64(uint64Value uint64) []byte {
+func vbyteEncodeUInt64[Num64Bit ~uint64](uint64Value Num64Bit) []byte {
 	var encoded []byte
 	for uint64Value != 0 {
 		encodedByte := withMSBtoZero(uint8(uint64Value))

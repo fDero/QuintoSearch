@@ -36,10 +36,15 @@ var (
 	AndQueryPolicy = func(lx, rx Match) bool { return lx.Success && rx.Success }
 )
 
+func withinBound(m1, m2 Match, dist int) bool {
+	canSubtract := m1.StartPosition > m2.EndPosition
+	return !canSubtract || (m1.StartPosition-m2.EndPosition) <= misc.TermPosition(dist)
+}
+
 func NearQueryPolicy(dist int) func(lx, rx Match) bool {
 	return func(lx, rx Match) bool {
-		withinBoundsForwards := (rx.StartPosition - lx.EndPosition) <= dist
-		withinBoundsBackwards := (lx.StartPosition - rx.EndPosition) <= dist
+		withinBoundsForwards := withinBound(lx, rx, dist)
+		withinBoundsBackwards := withinBound(rx, lx, dist)
 		withinBounds := withinBoundsForwards && withinBoundsBackwards
 		return lx.Success && rx.Success && withinBounds
 	}
@@ -59,7 +64,7 @@ func (q *ComplexQuery) Run() Match {
 
 	if lxMatch.Success && rxMatch.Success {
 
-		if lxMatch.DocumentId != rxMatch.DocumentId {
+		if lxMatch.DocId != rxMatch.DocId {
 			return Match{Success: false}
 		}
 
@@ -72,7 +77,7 @@ func (q *ComplexQuery) Run() Match {
 		lxMatch.InvolvedTokens.InsertAll(&rxMatch.InvolvedTokens)
 		return Match{
 			Success:        success,
-			DocumentId:     lxMatch.DocumentId,
+			DocId:          lxMatch.DocId,
 			StartPosition:  lxMatch.StartPosition,
 			EndPosition:    rxMatch.EndPosition,
 			InvolvedTokens: lxMatch.InvolvedTokens,
@@ -116,7 +121,7 @@ func (q *ComplexQuery) Close() {
 	q.rx.Close()
 }
 
-func (q *ComplexQuery) coordinates() (uint64, int) {
+func (q *ComplexQuery) coordinates() (misc.DocumentId, misc.TermPosition) {
 	lxDocumentId, lxPosition := q.lx.coordinates()
 	rxDocumentId, rxPosition := q.rx.coordinates()
 	if lxDocumentId < rxDocumentId {

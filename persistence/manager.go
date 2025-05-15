@@ -52,7 +52,7 @@ func NewPersistenceManager(dbDirectory string) *PersistenceManager {
 	}
 }
 
-func (pm *PersistenceManager) StoreNewDocument(documentId uint64, documentInputTokenStream iter.Seq[misc.Token]) {
+func (pm *PersistenceManager) StoreNewDocument(documentId misc.DocumentId, documentInputTokenStream iter.Seq[misc.Token]) {
 	segmentsForGivenTermInCurrentDocument := make(map[string]string)
 	for token := range documentInputTokenStream {
 		key, found := segmentsForGivenTermInCurrentDocument[token.StemmedText]
@@ -72,8 +72,8 @@ func (pm *PersistenceManager) StoreNewDocument(documentId uint64, documentInputT
 			pm.mutex.Unlock()
 		}
 		syncseg.add(misc.TermTracker{
-			DocumentId: documentId,
-			Position:   token.Position,
+			DocId:    documentId,
+			Position: token.Position,
 		})
 		pm.segments.Set(key, syncseg, syncseg.estimateSize())
 	}
@@ -117,7 +117,7 @@ func (pm *PersistenceManager) fetchSegmentFromDisk(term string, blockCounter int
 	return nil, false
 }
 
-func (pm *PersistenceManager) getCacheKey(term string, documentId uint64) string {
+func (pm *PersistenceManager) getCacheKey(term string, documentId misc.DocumentId) string {
 	for counter := 0; true; counter++ {
 		currentKey := fmt.Sprint(term, "_", counter)
 		segment, found := pm.segments.Get(currentKey)

@@ -55,9 +55,9 @@ func TestStoreAndRetrieve(t *testing.T) {
 			yield(misc.Token{StemmedText: "there", Position: 2})
 	})
 	expected := []misc.TermTracker{
-		{DocumentId: 1, Position: 1},
-		{DocumentId: 1, Position: 3},
-		{DocumentId: 2, Position: 1},
+		{DocId: 1, Position: 1},
+		{DocId: 1, Position: 3},
+		{DocId: 2, Position: 1},
 	}
 	counter := 0
 	for term := range pm.GetInvertedListIterator("hello") {

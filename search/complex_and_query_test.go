@@ -7,8 +7,8 @@ import (
 
 func TestAndQuerySuccess(t *testing.T) {
 
-	lxQuerySuccess := NewExactQueryFromSlice([]misc.TermTracker{{DocumentId: 1, Position: 0}})
-	rxQuerySuccess := NewExactQueryFromSlice([]misc.TermTracker{{DocumentId: 1, Position: 1}})
+	lxQuerySuccess := NewExactQueryFromSlice([]misc.TermTracker{{DocId: 1, Position: 0}})
+	rxQuerySuccess := NewExactQueryFromSlice([]misc.TermTracker{{DocId: 1, Position: 1}})
 
 	andQuery := ComplexQuery{
 		lx:     &lxQuerySuccess,
@@ -25,8 +25,8 @@ func TestAndQuerySuccess(t *testing.T) {
 
 func TestAndQueryFailureByIdMismatch(t *testing.T) {
 
-	lxQuerySuccess := NewExactQueryFromSlice([]misc.TermTracker{{DocumentId: 1, Position: 0}})
-	rxQuerySuccess := NewExactQueryFromSlice([]misc.TermTracker{{DocumentId: 3, Position: 1}})
+	lxQuerySuccess := NewExactQueryFromSlice([]misc.TermTracker{{DocId: 1, Position: 0}})
+	rxQuerySuccess := NewExactQueryFromSlice([]misc.TermTracker{{DocId: 3, Position: 1}})
 
 	andQuery := ComplexQuery{
 		lx:     &lxQuerySuccess,
@@ -43,8 +43,8 @@ func TestAndQueryFailureByIdMismatch(t *testing.T) {
 
 func TestAndQueryFailureByPolicy(t *testing.T) {
 
-	lxQuerySuccess := NewExactQueryFromSlice([]misc.TermTracker{{DocumentId: 1, Position: 3}})
-	rxQuerySuccess := NewExactQueryFromSlice([]misc.TermTracker{{DocumentId: 1, Position: 2}})
+	lxQuerySuccess := NewExactQueryFromSlice([]misc.TermTracker{{DocId: 1, Position: 3}})
+	rxQuerySuccess := NewExactQueryFromSlice([]misc.TermTracker{{DocId: 1, Position: 2}})
 
 	andQuery := ComplexQuery{
 		lx:     &lxQuerySuccess,
