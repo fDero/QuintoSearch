@@ -5,10 +5,11 @@ import (
 )
 
 type Match struct {
-	Success       bool
-	DocumentId    uint64
-	StartPosition int
-	EndPosition   int
+	Success        bool
+	DocumentId     uint64
+	StartPosition  int
+	EndPosition    int
+	InvolvedTokens misc.Set[misc.Token]
 }
 
 type Query interface {

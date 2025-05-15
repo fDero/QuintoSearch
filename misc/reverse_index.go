@@ -22,9 +22,14 @@ import (
 	"iter"
 )
 
-type Token struct {
+type FatToken struct {
 	StemmedText  string
 	OriginalText string
+	Position     int
+}
+
+type Token struct {
+	StemmedText  string
 	Position     int
 }
 

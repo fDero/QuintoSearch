@@ -73,11 +73,19 @@ func (q *ExactQuery) Run() Match {
 	if !exists {
 		return Match{Success: false}
 	}
+
+	involvedTokens := misc.NewSet[misc.Token]()
+	involvedTokens.InsertOne(misc.Token{
+		StemmedText: q.term,
+		Position:    value.Position,
+	})
+
 	return Match{
-		Success:       true,
-		DocumentId:    value.DocumentId,
-		StartPosition: value.Position,
-		EndPosition:   value.Position,
+		Success:        true,
+		DocumentId:     value.DocumentId,
+		StartPosition:  value.Position,
+		EndPosition:    value.Position,
+		InvolvedTokens: involvedTokens,
 	}
 }
 

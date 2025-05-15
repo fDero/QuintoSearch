@@ -41,7 +41,6 @@ func createDummyDocument(tokens []string) []misc.Token {
 	for i, token := range tokens {
 		out = append(out, misc.Token{
 			StemmedText:  token,
-			OriginalText: token,
 			Position:     i,
 		})
 	}

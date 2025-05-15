@@ -69,11 +69,13 @@ func (q *ComplexQuery) Run() Match {
 			success = !q.ord
 		}
 
+		lxMatch.InvolvedTokens.InsertAll(&rxMatch.InvolvedTokens)
 		return Match{
-			Success:       success,
-			DocumentId:    lxMatch.DocumentId,
-			StartPosition: lxMatch.StartPosition,
-			EndPosition:   rxMatch.EndPosition,
+			Success:        success,
+			DocumentId:     lxMatch.DocumentId,
+			StartPosition:  lxMatch.StartPosition,
+			EndPosition:    rxMatch.EndPosition,
+			InvolvedTokens: lxMatch.InvolvedTokens,
 		}
 	}
 
