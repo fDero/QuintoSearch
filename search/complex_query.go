@@ -24,25 +24,25 @@ import (
 )
 
 type ComplexQuery struct {
-	lx     Query
-	rx     Query
+	lx     misc.Query
+	rx     misc.Query
 	ord    bool
-	policy func(Match, Match) bool
+	policy func(misc.Match, misc.Match) bool
 }
 
 var (
-	OrQueryPolicy  = func(lx, rx Match) bool { return lx.Success || rx.Success }
-	XorQueryPolicy = func(lx, rx Match) bool { return lx.Success != rx.Success }
-	AndQueryPolicy = func(lx, rx Match) bool { return lx.Success && rx.Success }
+	OrQueryPolicy  = func(lx, rx misc.Match) bool { return lx.Success || rx.Success }
+	XorQueryPolicy = func(lx, rx misc.Match) bool { return lx.Success != rx.Success }
+	AndQueryPolicy = func(lx, rx misc.Match) bool { return lx.Success && rx.Success }
 )
 
-func withinBound(m1, m2 Match, dist int) bool {
+func withinBound(m1, m2 misc.Match, dist int) bool {
 	canSubtract := m1.StartPosition > m2.EndPosition
 	return !canSubtract || (m1.StartPosition-m2.EndPosition) <= misc.TermPosition(dist)
 }
 
-func NearQueryPolicy(dist int) func(lx, rx Match) bool {
-	return func(lx, rx Match) bool {
+func NearQueryPolicy(dist int) func(lx, rx misc.Match) bool {
+	return func(lx, rx misc.Match) bool {
 		withinBoundsForwards := withinBound(lx, rx, dist)
 		withinBoundsBackwards := withinBound(rx, lx, dist)
 		withinBounds := withinBoundsForwards && withinBoundsBackwards
@@ -55,17 +55,17 @@ func (q *ComplexQuery) Init(index misc.ReverseIndex) {
 	q.rx.Init(index)
 }
 
-func (q *ComplexQuery) Run() Match {
+func (q *ComplexQuery) Run() misc.Match {
 	lxMatch := q.lx.Run()
 	rxMatch := q.rx.Run()
 	if !q.policy(lxMatch, rxMatch) {
-		return Match{Success: false}
+		return misc.Match{Success: false}
 	}
 
 	if lxMatch.Success && rxMatch.Success {
 
 		if lxMatch.DocId != rxMatch.DocId {
-			return Match{Success: false}
+			return misc.Match{Success: false}
 		}
 
 		success := true
@@ -75,7 +75,7 @@ func (q *ComplexQuery) Run() Match {
 		}
 
 		lxMatch.InvolvedTokens.InsertAll(&rxMatch.InvolvedTokens)
-		return Match{
+		return misc.Match{
 			Success:        success,
 			DocId:          lxMatch.DocId,
 			StartPosition:  lxMatch.StartPosition,
@@ -92,12 +92,12 @@ func (q *ComplexQuery) Run() Match {
 		return rxMatch
 	}
 
-	return Match{Success: true}
+	return misc.Match{Success: true}
 }
 
 func (q *ComplexQuery) Advance() {
-	lxDocumentId, lxPosition := q.lx.coordinates()
-	rxDocumentId, rxPosition := q.rx.coordinates()
+	lxDocumentId, lxPosition := q.lx.Coordinates()
+	rxDocumentId, rxPosition := q.rx.Coordinates()
 	shouldGoLxByDocumentId := lxDocumentId < rxDocumentId
 	shouldGoLxByPosition := lxDocumentId == rxDocumentId && lxPosition < rxPosition
 	shouldGoLx := shouldGoLxByDocumentId || shouldGoLxByPosition
@@ -121,9 +121,9 @@ func (q *ComplexQuery) Close() {
 	q.rx.Close()
 }
 
-func (q *ComplexQuery) coordinates() (misc.DocumentId, misc.TermPosition) {
-	lxDocumentId, lxPosition := q.lx.coordinates()
-	rxDocumentId, rxPosition := q.rx.coordinates()
+func (q *ComplexQuery) Coordinates() (misc.DocumentId, misc.TermPosition) {
+	lxDocumentId, lxPosition := q.lx.Coordinates()
+	rxDocumentId, rxPosition := q.rx.Coordinates()
 	if lxDocumentId < rxDocumentId {
 		return lxDocumentId, lxPosition
 	}

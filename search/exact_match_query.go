@@ -68,10 +68,10 @@ func (q *ExactQuery) Init(index misc.ReverseIndex) {
 	q.close = tmp.close
 }
 
-func (q *ExactQuery) Run() Match {
+func (q *ExactQuery) Run() misc.Match {
 	value, exists := q.peek()
 	if !exists {
-		return Match{Success: false}
+		return misc.Match{Success: false}
 	}
 
 	involvedTokens := misc.NewSet[misc.Token]()
@@ -80,7 +80,7 @@ func (q *ExactQuery) Run() Match {
 		Position:    value.Position,
 	})
 
-	return Match{
+	return misc.Match{
 		Success:        true,
 		DocId:          value.DocId,
 		StartPosition:  value.Position,
@@ -107,7 +107,7 @@ func (q *ExactQuery) Ended() bool {
 	return !exists
 }
 
-func (q *ExactQuery) coordinates() (misc.DocumentId, misc.TermPosition) {
+func (q *ExactQuery) Coordinates() (misc.DocumentId, misc.TermPosition) {
 	value, exists := q.peek()
 	if !exists {
 		return 0, 0

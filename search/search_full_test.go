@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func runTestCollectMatchesHelper(t *testing.T, queryString string) map[misc.DocumentId]Match {
+func runTestCollectMatchesHelper(t *testing.T, queryString string) map[misc.DocumentId]misc.Match {
 
 	index := NewNaiveReverseIndex()
 	index.StoreNewDocument(misc.NewSliceIterator(helloWorldDocument))
@@ -20,7 +20,7 @@ func runTestCollectMatchesHelper(t *testing.T, queryString string) map[misc.Docu
 	}
 
 	defer query.Close()
-	results := map[misc.DocumentId]Match{}
+	results := map[misc.DocumentId]misc.Match{}
 
 	query.Init(index)
 
