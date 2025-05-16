@@ -6,8 +6,9 @@
 
 ============================== BRIEF FILE DESCRIPTION ===============================
 
-This files contains some utilities that are often needed in the codebase. Such
-utilities are not specific to a particular package, but are used in multiple packages.
+This files contains some slice-related utilities that are often needed in the codebase.
+Such utilities are not specific to a particular package, but are used in multiple
+packages. Most of them are simple wrappers/adapters around the "iter" package.
 ==================================================================================*/
 
 package data

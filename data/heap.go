@@ -1,3 +1,25 @@
+/*=================================== LICENSE =======================================
+
+                                   Apache License
+                             Version 2.0, January 2004
+                          http://www.apache.org/licenses/
+
+============================== BRIEF FILE DESCRIPTION ===============================
+
+This file contains a simple implementation of a heap data structure. It is a generic
+implementation that can store any type, and relies on a user-defined ordering
+predicate to determine the order of the elements in the heap. The heap is implemented
+as a slice, and the ordering predicate is used to compare elements when inserting
+and removing elements from the heap. The heap supports the standard operations of
+pushing, popping, peeking at the top element, and checking for its size.
+
+Remark: An Heap is a specialized tree-based data structure that satisfies the
+heap property, meaning that every parent node satisfies the ordering predicate
+with respect to its child nodes. When the ordering predicate is "less-than",
+the heap is called a "min-heap", and the smallest element is at the root. The
+root is always the element that gets peeked or popped from the heap.
+==================================================================================*/
+
 package data
 
 type Heap[T any] struct {

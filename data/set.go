@@ -1,3 +1,17 @@
+/*=================================== LICENSE =======================================
+
+                                   Apache License
+                             Version 2.0, January 2004
+                          http://www.apache.org/licenses/
+
+============================== BRIEF FILE DESCRIPTION ===============================
+
+This file contains a simple implementation of a set data structure. It is a generic
+implementation that can store any type that is comparable. The set is implemented
+as a simple wrapper around a plain old map, where the keys are the values of the
+set and the values are dummy values (e.g. booleans that are always true).
+==================================================================================*/
+
 package data
 
 type Set[T comparable] struct {

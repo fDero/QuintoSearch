@@ -1,3 +1,19 @@
+/*=================================== LICENSE =======================================
+
+                                   Apache License
+                             Version 2.0, January 2004
+                          http://www.apache.org/licenses/
+
+============================== BRIEF FILE DESCRIPTION ===============================
+
+This file contains the implementation of "BoundedResultSet", which is a concrete
+implementation of the "ResultSet" interface, based on a heap data structure.
+
+It is designed to store a limited number of search results, and when the limit is
+reached, it will remove the least relevant result. The results are stored in a
+heap, which allows for efficient insertion and removal of elements.
+==================================================================================*/
+
 package ranking
 
 import (
