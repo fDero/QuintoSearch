@@ -2,12 +2,12 @@ package search
 
 import (
 	"iter"
-	"quinto/misc"
+	"quinto/data"
 	"testing"
 )
 
 func TestDocumentIteration(t *testing.T) {
-	documentIterator := misc.NewSliceIterator(helloWorldDocument)
+	documentIterator := data.NewSliceIterator(helloWorldDocument)
 	next, close := iter.Pull(documentIterator)
 	_, exists := next()
 	defer close()
@@ -17,7 +17,7 @@ func TestDocumentIteration(t *testing.T) {
 }
 
 func TestTermIteration(t *testing.T) {
-	documentIterator := misc.NewSliceIterator(helloWorldDocument)
+	documentIterator := data.NewSliceIterator(helloWorldDocument)
 	index := NewNaiveReverseIndex()
 	index.StoreNewDocument(documentIterator)
 	termIterator := index.IterateOverTerms("hello")
@@ -31,7 +31,7 @@ func TestTermIteration(t *testing.T) {
 
 func runTestQueryHelper(t *testing.T, queryString string, success bool) {
 	index := NewNaiveReverseIndex()
-	tokenIterator := misc.NewSliceIterator(helloWorldDocument)
+	tokenIterator := data.NewSliceIterator(helloWorldDocument)
 	index.StoreNewDocument(tokenIterator)
 
 	queryFragments := SplitQuery(queryString)
@@ -53,21 +53,21 @@ func TestSearchOverallForOneWord(t *testing.T) {
 
 func TestSearchOverallForTwoWordSuccess(t *testing.T) {
 	index := NewNaiveReverseIndex()
-	tokenIterator := misc.NewSliceIterator(helloWorldDocument)
+	tokenIterator := data.NewSliceIterator(helloWorldDocument)
 	index.StoreNewDocument(tokenIterator)
 	runTestQueryHelper(t, "hello AND world", true)
 }
 
 func TestTermIterationFailure(t *testing.T) {
 	index := NewNaiveReverseIndex()
-	tokenIterator := misc.NewSliceIterator(helloWorldDocument)
+	tokenIterator := data.NewSliceIterator(helloWorldDocument)
 	index.StoreNewDocument(tokenIterator)
 	runTestQueryHelper(t, "guitar", false)
 }
 
 func TestSearchOverallForTwoWordFailure(t *testing.T) {
 	index := NewNaiveReverseIndex()
-	tokenIterator := misc.NewSliceIterator(helloWorldDocument)
+	tokenIterator := data.NewSliceIterator(helloWorldDocument)
 	index.StoreNewDocument(tokenIterator)
 	runTestQueryHelper(t, "guitar AND world", false)
 }

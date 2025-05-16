@@ -18,6 +18,7 @@ package search
 import (
 	"iter"
 	"quinto/misc"
+	"quinto/data"
 )
 
 type ExactQuery struct {
@@ -74,7 +75,7 @@ func (q *ExactQuery) Run() misc.Match {
 		return misc.Match{Success: false}
 	}
 
-	involvedTokens := misc.NewSet[misc.Token]()
+	involvedTokens := data.NewSet[misc.Token]()
 	involvedTokens.InsertOne(misc.Token{
 		StemmedText: q.term,
 		Position:    value.Position,

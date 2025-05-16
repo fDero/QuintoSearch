@@ -1,6 +1,7 @@
 package search
 
 import (
+	"quinto/data"
 	"quinto/misc"
 	"testing"
 )
@@ -8,10 +9,10 @@ import (
 func runTestCollectMatchesHelper(t *testing.T, queryString string) map[misc.DocumentId]misc.Match {
 
 	index := NewNaiveReverseIndex()
-	index.StoreNewDocument(misc.NewSliceIterator(helloWorldDocument))
-	index.StoreNewDocument(misc.NewSliceIterator(guitarDocument))
-	index.StoreNewDocument(misc.NewSliceIterator(hobbyDocument))
-	index.StoreNewDocument(misc.NewSliceIterator(toolsDocument))
+	index.StoreNewDocument(data.NewSliceIterator(helloWorldDocument))
+	index.StoreNewDocument(data.NewSliceIterator(guitarDocument))
+	index.StoreNewDocument(data.NewSliceIterator(hobbyDocument))
+	index.StoreNewDocument(data.NewSliceIterator(toolsDocument))
 
 	queryFragments := SplitQuery(queryString)
 	query, err := ParseQuery(queryFragments)

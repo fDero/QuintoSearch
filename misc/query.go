@@ -23,12 +23,16 @@ Calling "Init" and "Close" is mandatory for the well functioning of the query AP
 
 package misc
 
+import (
+	"quinto/data"
+)
+
 type Match struct {
 	Success        bool
 	DocId          DocumentId
 	StartPosition  TermPosition
 	EndPosition    TermPosition
-	InvolvedTokens Set[Token]
+	InvolvedTokens data.Set[Token]
 }
 
 type Query interface {
