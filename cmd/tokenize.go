@@ -15,10 +15,10 @@ var tokenizeCmd = &cobra.Command{
 	},
 
 	Run: func(cmd *cobra.Command, args []string) {
-		tokens := ParseInputTokens(cmd, args)
-		for _, token := range tokens {
-			fmt.Printf("[%s] ", token)
+		for token := range IterateTokens(cmd, args) {
+			fmt.Printf("[%s] ", token.StemmedText)
 		}
+
 	},
 }
 

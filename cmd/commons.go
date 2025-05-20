@@ -2,7 +2,12 @@ package cmd
 
 import (
 	"fmt"
-	"quinto/frontend"
+	"iter"
+	"log"
+	"os"
+	"quinto/core"
+	"quinto/data"
+	"quinto/stemming"
 
 	"github.com/spf13/cobra"
 )
@@ -28,13 +33,30 @@ func RegisterInputFlags(cmd *cobra.Command) {
 	cmd.Flags().String("lang", "eng", "Select language: eng->English")
 }
 
-func ParseInputTokens(cmd *cobra.Command, args []string) []string {
+func IterateTokens(cmd *cobra.Command, args []string) iter.Seq[core.Token] {
 	asInlineText, _ := cmd.Flags().GetString("inline")
 	asFilePath, _ := cmd.Flags().GetString("filepath")
+	lang, _ := cmd.Flags().GetString("lang")
+
+	var sourceTextIterator iter.Seq[string]
 
 	if len(asInlineText) > 0 {
-		return frontend.ProcessInputText(asInlineText)
+		sourceTextIterator = data.NewStringIterator(asInlineText)
 	} else {
-		return frontend.ProcessInputFile(asFilePath)
+		file, err := os.Open(asFilePath)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer file.Close()
+		sourceTextIterator = data.NewFileReaderIterator(file)
 	}
+
+	switch lang {
+	case "eng":
+		return stemming.NewEnglishTokenIterator(sourceTextIterator)
+	case "":
+		return stemming.NewEnglishTokenIterator(sourceTextIterator)
+	}
+
+	panic(fmt.Sprintf("Unsupported language: %s", lang))
 }

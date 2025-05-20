@@ -18,6 +18,14 @@ type Set[T comparable] struct {
 	storage map[T]bool
 }
 
+func ToSet[T comparable](values []T) Set[T] {
+	set := NewSet[T]()
+	for _, value := range values {
+		set.InsertOne(value)
+	}
+	return set
+}
+
 func NewSet[T comparable]() Set[T] {
 	return Set[T]{
 		storage: make(map[T]bool),

@@ -1,55 +1,30 @@
-package frontend
+package stemming
 
 import (
+	"quinto/data"
 	"strings"
 )
 
-type stemmingPattern struct {
-	suffix      string
-	replacement string
-	minLen      int
-	maxLen      int
+func stopWordsEnglish() data.Set[string] {
+	return data.ToSet([]string{
+		"i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you", "your",
+		"yours", "yourself", "yourselves", "he", "him", "his", "himself", "she", "her",
+		"hers", "herself", "it", "its", "itself", "they", "them", "their", "theirs",
+		"themselves", "what", "which", "who", "whom", "this", "that", "these", "those",
+		"am", "is", "are", "was", "were", "be", "been", "being", "have", "has",
+		"had", "having", "do", "does", "did", "doing", "a", "an", "the", "and",
+		"but", "if", "or", "because", "as", "until", "while", "of", "at", "by",
+		"for", "with", "about", "against", "between", "into", "through", "during",
+		"before", "after", "above", "below", "to", "from", "up", "down", "in",
+		"out", "on", "off", "over", "under", "again", "further", "then", "once",
+		"here", "there", "when", "where", "why", "how", "all", "any", "both",
+		"each", "few", "more", "most", "other", "some", "such", "no", "nor",
+		"not", "only", "own", "same", "so", "than", "too", "very", "s", "t",
+		"can", "will", "just", "don", "should", "now",
+	})
 }
 
-func matchAndReplace(text string, patterns []stemmingPattern) string {
-	for _, pattern := range patterns {
-		textLen := len(text)
-		if textLen < pattern.minLen {
-			continue
-		}
-		if pattern.maxLen > 0 && textLen > pattern.maxLen {
-			continue
-		}
-		if strings.HasSuffix(text, pattern.suffix) {
-			return strings.TrimSuffix(text, pattern.suffix) + pattern.replacement
-		}
-	}
-	return text
-}
-
-func hasVowelBeforeLastNChars(text string, lastChars int) bool {
-	vowels := "aeiouyAEIOUY"
-	for index, char := range text {
-		valid := index < len(text)-lastChars
-		isVowel := strings.ContainsRune(vowels, char)
-		if valid && isVowel {
-			return true
-		}
-	}
-	return false
-}
-
-func removeLastVowel(text string) string {
-	vowels := "aeiouyAEIOUY"
-	lastRune := rune(text[len(text)-1])
-	lastChar := string(text[len(text)-1])
-	if strings.ContainsRune(vowels, lastRune) {
-		return strings.TrimSuffix(text, lastChar)
-	}
-	return text
-}
-
-func removeLastS(text string) string {
+func removePluralEnglish(text string) string {
 	if strings.HasSuffix(text, "s") {
 		if hasVowelBeforeLastNChars(text, 2) {
 			return strings.TrimSuffix(text, "s")
@@ -60,18 +35,7 @@ func removeLastS(text string) string {
 	return text
 }
 
-func removeLastRepeatedConsonant(text string) string {
-	if len(text) > 2 {
-		lastChar := string(text[len(text)-1])
-		prevChar := string(text[len(text)-2])
-		if lastChar == prevChar {
-			return strings.TrimSuffix(text, lastChar)
-		}
-	}
-	return text
-}
-
-func removeSimpleSuffix(text string) string {
+func removeSimpleSuffixEnglish(text string) string {
 	return matchAndReplace(text, []stemmingPattern{
 		{suffix: "fulness", replacement: "", minLen: 0, maxLen: 0},
 		{suffix: "lyhood", replacement: "", minLen: 8, maxLen: 0},
@@ -116,19 +80,10 @@ func removeSimpleSuffix(text string) string {
 	})
 }
 
-func normalizeSingleToken(text string) string {
-	text = removeSimpleSuffix(text)
-	text = removeLastS(text)
+func stemEnglish(text string) string {
+	text = removeSimpleSuffixEnglish(text)
+	text = removePluralEnglish(text)
 	text = removeLastVowel(text)
-	text = removeLastRepeatedConsonant(text)
+	text = removeLastRepeatedLetter(text)
 	return text
-}
-
-func NormalizeTokens(tokens []string) []string {
-	var normalizedTokens []string
-	for _, txt := range tokens {
-		normtxt := normalizeSingleToken(txt)
-		normalizedTokens = append(normalizedTokens, normtxt)
-	}
-	return normalizedTokens
 }

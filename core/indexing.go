@@ -26,14 +26,9 @@ type DocumentId uint64
 
 type TermPosition uint64
 
-type FatToken struct {
-	StemmedText  string
-	OriginalText string
-	Position     TermPosition
-}
-
 type Token struct {
 	StemmedText string
+	OriginalText string
 	Position    TermPosition
 }
 
