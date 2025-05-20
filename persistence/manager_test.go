@@ -2,7 +2,7 @@ package persistence
 
 import (
 	"os"
-	"quinto/misc"
+	"quinto/core"
 	"testing"
 )
 
@@ -35,26 +35,26 @@ func TestNewPersistenceManager(t *testing.T) {
 func TestStoreNewDocument(t *testing.T) {
 	tempDir := initTemporaryDirectory(t)
 	pm := NewPersistenceManager(tempDir)
-	pm.StoreNewDocument(1, func(yield func(misc.Token) bool) {
-		_ = yield(misc.Token{StemmedText: "hello", Position: 1}) &&
-			yield(misc.Token{StemmedText: "world", Position: 2}) &&
-			yield(misc.Token{StemmedText: "hello", Position: 3})
+	pm.StoreNewDocument(1, func(yield func(core.Token) bool) {
+		_ = yield(core.Token{StemmedText: "hello", Position: 1}) &&
+			yield(core.Token{StemmedText: "world", Position: 2}) &&
+			yield(core.Token{StemmedText: "hello", Position: 3})
 	})
 }
 
 func TestStoreAndRetrieve(t *testing.T) {
 	tempDir := initTemporaryDirectory(t)
 	pm := NewPersistenceManager(tempDir)
-	pm.StoreNewDocument(1, func(yield func(misc.Token) bool) {
-		_ = yield(misc.Token{StemmedText: "hello", Position: 1}) &&
-			yield(misc.Token{StemmedText: "world", Position: 2}) &&
-			yield(misc.Token{StemmedText: "hello", Position: 3})
+	pm.StoreNewDocument(1, func(yield func(core.Token) bool) {
+		_ = yield(core.Token{StemmedText: "hello", Position: 1}) &&
+			yield(core.Token{StemmedText: "world", Position: 2}) &&
+			yield(core.Token{StemmedText: "hello", Position: 3})
 	})
-	pm.StoreNewDocument(2, func(yield func(misc.Token) bool) {
-		_ = yield(misc.Token{StemmedText: "hello", Position: 1}) &&
-			yield(misc.Token{StemmedText: "there", Position: 2})
+	pm.StoreNewDocument(2, func(yield func(core.Token) bool) {
+		_ = yield(core.Token{StemmedText: "hello", Position: 1}) &&
+			yield(core.Token{StemmedText: "there", Position: 2})
 	})
-	expected := []misc.TermTracker{
+	expected := []core.TermTracker{
 		{DocId: 1, Position: 1},
 		{DocId: 1, Position: 3},
 		{DocId: 2, Position: 1},

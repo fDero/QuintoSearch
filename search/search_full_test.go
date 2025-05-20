@@ -1,12 +1,12 @@
 package search
 
 import (
+	"quinto/core"
 	"quinto/data"
-	"quinto/misc"
 	"testing"
 )
 
-func runTestCollectMatchesHelper(t *testing.T, queryString string) map[misc.DocumentId]misc.Match {
+func runTestCollectMatchesHelper(t *testing.T, queryString string) map[core.DocumentId]core.Match {
 
 	index := NewNaiveReverseIndex()
 	index.StoreNewDocument(data.NewSliceIterator(helloWorldDocument))
@@ -21,7 +21,7 @@ func runTestCollectMatchesHelper(t *testing.T, queryString string) map[misc.Docu
 	}
 
 	defer query.Close()
-	results := map[misc.DocumentId]misc.Match{}
+	results := map[core.DocumentId]core.Match{}
 
 	query.Init(index)
 

@@ -1,14 +1,14 @@
 package search
 
 import (
-	"quinto/misc"
+	"quinto/core"
 	"testing"
 )
 
 func TestNearQuerySuccess(t *testing.T) {
 
-	lxQuerySuccess := NewExactQueryFromSlice([]misc.TermTracker{{DocId: 1, Position: 0}})
-	rxQuerySuccess := NewExactQueryFromSlice([]misc.TermTracker{{DocId: 1, Position: 1}})
+	lxQuerySuccess := NewExactQueryFromSlice([]core.TermTracker{{DocId: 1, Position: 0}})
+	rxQuerySuccess := NewExactQueryFromSlice([]core.TermTracker{{DocId: 1, Position: 1}})
 
 	nearQuery := ComplexQuery{
 		lx:     &lxQuerySuccess,
@@ -25,8 +25,8 @@ func TestNearQuerySuccess(t *testing.T) {
 
 func TestNearQuerySuccessReverse(t *testing.T) {
 
-	lxQuerySuccess := NewExactQueryFromSlice([]misc.TermTracker{{DocId: 1, Position: 1}})
-	rxQuerySuccess := NewExactQueryFromSlice([]misc.TermTracker{{DocId: 1, Position: 0}})
+	lxQuerySuccess := NewExactQueryFromSlice([]core.TermTracker{{DocId: 1, Position: 1}})
+	rxQuerySuccess := NewExactQueryFromSlice([]core.TermTracker{{DocId: 1, Position: 0}})
 
 	andQuery := ComplexQuery{
 		lx:     &lxQuerySuccess,
@@ -43,8 +43,8 @@ func TestNearQuerySuccessReverse(t *testing.T) {
 
 func TestOrderedNearQueryFailureByWrongOrder(t *testing.T) {
 
-	lxQuerySuccess := NewExactQueryFromSlice([]misc.TermTracker{{DocId: 1, Position: 1}})
-	rxQuerySuccess := NewExactQueryFromSlice([]misc.TermTracker{{DocId: 1, Position: 0}})
+	lxQuerySuccess := NewExactQueryFromSlice([]core.TermTracker{{DocId: 1, Position: 1}})
+	rxQuerySuccess := NewExactQueryFromSlice([]core.TermTracker{{DocId: 1, Position: 0}})
 
 	andQuery := ComplexQuery{
 		lx:     &lxQuerySuccess,
@@ -61,8 +61,8 @@ func TestOrderedNearQueryFailureByWrongOrder(t *testing.T) {
 
 func TestNearQueryFailureByExcessiveDistance(t *testing.T) {
 
-	lxQuerySuccess := NewExactQueryFromSlice([]misc.TermTracker{{DocId: 1, Position: 0}})
-	rxQuerySuccess := NewExactQueryFromSlice([]misc.TermTracker{{DocId: 1, Position: 11}})
+	lxQuerySuccess := NewExactQueryFromSlice([]core.TermTracker{{DocId: 1, Position: 0}})
+	rxQuerySuccess := NewExactQueryFromSlice([]core.TermTracker{{DocId: 1, Position: 11}})
 
 	andQuery := ComplexQuery{
 		lx:     &lxQuerySuccess,
@@ -79,8 +79,8 @@ func TestNearQueryFailureByExcessiveDistance(t *testing.T) {
 
 func TestNearQueryFailureByExcessiveDistanceReverse(t *testing.T) {
 
-	lxQuerySuccess := NewExactQueryFromSlice([]misc.TermTracker{{DocId: 1, Position: 11}})
-	rxQuerySuccess := NewExactQueryFromSlice([]misc.TermTracker{{DocId: 1, Position: 0}})
+	lxQuerySuccess := NewExactQueryFromSlice([]core.TermTracker{{DocId: 1, Position: 11}})
+	rxQuerySuccess := NewExactQueryFromSlice([]core.TermTracker{{DocId: 1, Position: 0}})
 
 	andQuery := ComplexQuery{
 		lx:     &lxQuerySuccess,

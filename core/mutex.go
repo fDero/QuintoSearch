@@ -20,7 +20,7 @@ it that way by making sure that writers are not blocked by readers, hence they d
 pile up. In a databse context, we expect more reads than writes.
 ==================================================================================*/
 
-package misc
+package core
 
 import (
 	"sync"

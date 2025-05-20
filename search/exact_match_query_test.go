@@ -1,7 +1,7 @@
 package search
 
 import (
-	"quinto/misc"
+	"quinto/core"
 	"testing"
 )
 
@@ -9,8 +9,8 @@ func TestExactMatchQuerySuccess(t *testing.T) {
 
 	query := ExactQuery{
 		"test",
-		func() (misc.TermTracker, bool) {
-			return misc.TermTracker{DocId: 1, Position: 0}, true
+		func() (core.TermTracker, bool) {
+			return core.TermTracker{DocId: 1, Position: 0}, true
 		},
 		func() {},
 		func() {},

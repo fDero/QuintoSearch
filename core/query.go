@@ -21,7 +21,7 @@ into a single "SearchResult" before inserting it into the "ResultSet".
 Calling "Init" and "Close" is mandatory for the well functioning of the query API.
 ==================================================================================*/
 
-package misc
+package core
 
 import (
 	"quinto/data"

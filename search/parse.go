@@ -18,11 +18,11 @@ package search
 
 import (
 	"fmt"
-	"quinto/misc"
+	"quinto/core"
 )
 
 type parsingState struct {
-	queryStack      *[]misc.Query
+	queryStack      *[]core.Query
 	opStack         *[]any
 	precedenceStack *[]int
 }
@@ -45,13 +45,13 @@ func stackPop[T any](stack *[]T) T {
 	return q
 }
 
-func evaluateOne(queryStack *[]misc.Query, opStack *[]any) {
+func evaluateOne(queryStack *[]core.Query, opStack *[]any) {
 	op := stackPop(opStack)
 	switch v := op.(type) {
 	case ComplexQuery:
 		v.rx = stackPop(queryStack)
 		v.lx = stackPop(queryStack)
-		var castedToQuery misc.Query = &v
+		var castedToQuery core.Query = &v
 		stackPush(queryStack, castedToQuery)
 	default:
 		return
@@ -67,9 +67,9 @@ func evaluateAll(state parsingState, currentPrecedence int) {
 	}
 }
 
-func ParseQuery(queryFragments []queryFragment) (misc.Query, error) {
+func ParseQuery(queryFragments []queryFragment) (core.Query, error) {
 
-	var queryStack []misc.Query
+	var queryStack []core.Query
 	var opStack []any
 	var precedenceStack []int
 	var parsingState = parsingState{

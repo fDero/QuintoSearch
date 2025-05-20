@@ -20,29 +20,29 @@ to a term that appears before the second match in the document, you can set the
 package search
 
 import (
-	"quinto/misc"
+	"quinto/core"
 )
 
 type ComplexQuery struct {
-	lx     misc.Query
-	rx     misc.Query
+	lx     core.Query
+	rx     core.Query
 	ord    bool
-	policy func(misc.Match, misc.Match) bool
+	policy func(core.Match, core.Match) bool
 }
 
 var (
-	OrQueryPolicy  = func(lx, rx misc.Match) bool { return lx.Success || rx.Success }
-	XorQueryPolicy = func(lx, rx misc.Match) bool { return lx.Success != rx.Success }
-	AndQueryPolicy = func(lx, rx misc.Match) bool { return lx.Success && rx.Success }
+	OrQueryPolicy  = func(lx, rx core.Match) bool { return lx.Success || rx.Success }
+	XorQueryPolicy = func(lx, rx core.Match) bool { return lx.Success != rx.Success }
+	AndQueryPolicy = func(lx, rx core.Match) bool { return lx.Success && rx.Success }
 )
 
-func withinBound(m1, m2 misc.Match, dist int) bool {
+func withinBound(m1, m2 core.Match, dist int) bool {
 	canSubtract := m1.StartPosition > m2.EndPosition
-	return !canSubtract || (m1.StartPosition-m2.EndPosition) <= misc.TermPosition(dist)
+	return !canSubtract || (m1.StartPosition-m2.EndPosition) <= core.TermPosition(dist)
 }
 
-func NearQueryPolicy(dist int) func(lx, rx misc.Match) bool {
-	return func(lx, rx misc.Match) bool {
+func NearQueryPolicy(dist int) func(lx, rx core.Match) bool {
+	return func(lx, rx core.Match) bool {
 		withinBoundsForwards := withinBound(lx, rx, dist)
 		withinBoundsBackwards := withinBound(rx, lx, dist)
 		withinBounds := withinBoundsForwards && withinBoundsBackwards
@@ -50,22 +50,22 @@ func NearQueryPolicy(dist int) func(lx, rx misc.Match) bool {
 	}
 }
 
-func (q *ComplexQuery) Init(index misc.ReverseIndex) {
+func (q *ComplexQuery) Init(index core.ReverseIndex) {
 	q.lx.Init(index)
 	q.rx.Init(index)
 }
 
-func (q *ComplexQuery) Run() misc.Match {
+func (q *ComplexQuery) Run() core.Match {
 	lxMatch := q.lx.Run()
 	rxMatch := q.rx.Run()
 	if !q.policy(lxMatch, rxMatch) {
-		return misc.Match{Success: false}
+		return core.Match{Success: false}
 	}
 
 	if lxMatch.Success && rxMatch.Success {
 
 		if lxMatch.DocId != rxMatch.DocId {
-			return misc.Match{Success: false}
+			return core.Match{Success: false}
 		}
 
 		success := true
@@ -75,7 +75,7 @@ func (q *ComplexQuery) Run() misc.Match {
 		}
 
 		lxMatch.InvolvedTokens.InsertAll(&rxMatch.InvolvedTokens)
-		return misc.Match{
+		return core.Match{
 			Success:        success,
 			DocId:          lxMatch.DocId,
 			StartPosition:  lxMatch.StartPosition,
@@ -92,7 +92,7 @@ func (q *ComplexQuery) Run() misc.Match {
 		return rxMatch
 	}
 
-	return misc.Match{Success: true}
+	return core.Match{Success: true}
 }
 
 func (q *ComplexQuery) Advance() {
@@ -121,7 +121,7 @@ func (q *ComplexQuery) Close() {
 	q.rx.Close()
 }
 
-func (q *ComplexQuery) Coordinates() (misc.DocumentId, misc.TermPosition) {
+func (q *ComplexQuery) Coordinates() (core.DocumentId, core.TermPosition) {
 	lxDocumentId, lxPosition := q.lx.Coordinates()
 	rxDocumentId, rxPosition := q.rx.Coordinates()
 	if lxDocumentId < rxDocumentId {

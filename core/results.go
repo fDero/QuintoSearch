@@ -10,7 +10,7 @@ A "ResultSet" is the way multiple instances of "SearchResult" can be stored and
 iterated over in Quinto. It is designed to be as simple of an interface as possible.
 ==================================================================================*/
 
-package misc
+package core
 
 import (
 	"iter"

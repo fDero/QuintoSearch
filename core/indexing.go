@@ -16,7 +16,7 @@ that terms are iterated in ascending order of document-id and position within a 
 document. The "IterateOverTerms" must herby work in this way in every implementation.
 ==================================================================================*/
 
-package misc
+package core
 
 import (
 	"iter"

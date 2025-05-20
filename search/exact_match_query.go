@@ -17,23 +17,23 @@ package search
 
 import (
 	"iter"
-	"quinto/misc"
+	"quinto/core"
 	"quinto/data"
 )
 
 type ExactQuery struct {
 	term    string
-	peek    func() (misc.TermTracker, bool)
+	peek    func() (core.TermTracker, bool)
 	advance func()
 	close   func()
 }
 
-func NewExactQueryFromSlice(terms []misc.TermTracker) ExactQuery {
+func NewExactQueryFromSlice(terms []core.TermTracker) ExactQuery {
 	index := 0
 	return ExactQuery{
-		peek: func() (misc.TermTracker, bool) {
+		peek: func() (core.TermTracker, bool) {
 			if index >= len(terms) {
-				return misc.TermTracker{}, false
+				return core.TermTracker{}, false
 			}
 			return terms[index], true
 		},
@@ -46,11 +46,11 @@ func NewExactQueryFromSlice(terms []misc.TermTracker) ExactQuery {
 	}
 }
 
-func NewExactQuery(iterator iter.Seq[misc.TermTracker]) ExactQuery {
+func NewExactQuery(iterator iter.Seq[core.TermTracker]) ExactQuery {
 	next, stop := iter.Pull(iterator)
 	value, exists := next()
 	return ExactQuery{
-		peek: func() (misc.TermTracker, bool) {
+		peek: func() (core.TermTracker, bool) {
 			return value, exists
 		},
 		advance: func() {
@@ -62,26 +62,26 @@ func NewExactQuery(iterator iter.Seq[misc.TermTracker]) ExactQuery {
 	}
 }
 
-func (q *ExactQuery) Init(index misc.ReverseIndex) {
+func (q *ExactQuery) Init(index core.ReverseIndex) {
 	tmp := NewExactQuery(index.IterateOverTerms(q.term))
 	q.peek = tmp.peek
 	q.advance = tmp.advance
 	q.close = tmp.close
 }
 
-func (q *ExactQuery) Run() misc.Match {
+func (q *ExactQuery) Run() core.Match {
 	value, exists := q.peek()
 	if !exists {
-		return misc.Match{Success: false}
+		return core.Match{Success: false}
 	}
 
-	involvedTokens := data.NewSet[misc.Token]()
-	involvedTokens.InsertOne(misc.Token{
+	involvedTokens := data.NewSet[core.Token]()
+	involvedTokens.InsertOne(core.Token{
 		StemmedText: q.term,
 		Position:    value.Position,
 	})
 
-	return misc.Match{
+	return core.Match{
 		Success:        true,
 		DocId:          value.DocId,
 		StartPosition:  value.Position,
@@ -108,7 +108,7 @@ func (q *ExactQuery) Ended() bool {
 	return !exists
 }
 
-func (q *ExactQuery) Coordinates() (misc.DocumentId, misc.TermPosition) {
+func (q *ExactQuery) Coordinates() (core.DocumentId, core.TermPosition) {
 	value, exists := q.peek()
 	if !exists {
 		return 0, 0

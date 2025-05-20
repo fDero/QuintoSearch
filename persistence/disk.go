@@ -18,12 +18,12 @@ package persistence
 import (
 	"bufio"
 	"io"
-	"quinto/misc"
+	"quinto/core"
 )
 
 func StoreOnDisk(fileWriter *bufio.Writer, invertedList *segment) error {
-	lastDocumentId := misc.DocumentId(0)
-	lastPosition := misc.TermPosition(0)
+	lastDocumentId := core.DocumentId(0)
+	lastPosition := core.TermPosition(0)
 	for tracker := range invertedList.iterator() {
 
 		documentIdDelta := tracker.DocId - lastDocumentId
@@ -53,8 +53,8 @@ func StoreOnDisk(fileWriter *bufio.Writer, invertedList *segment) error {
 func LoadFromDisk(fileReader *bufio.Reader) (*segment, error) {
 	var invertedList *segment = newSegment()
 
-	documentId := misc.DocumentId(0)
-	position := misc.TermPosition(0)
+	documentId := core.DocumentId(0)
+	position := core.TermPosition(0)
 
 	for {
 		encodedDocumentIdDelta, idErr := loadVbyteEncodedUInt64(fileReader)
@@ -70,17 +70,17 @@ func LoadFromDisk(fileReader *bufio.Reader) (*segment, error) {
 			return invertedList, posErr
 		}
 
-		documentIdDelta := misc.DocumentId(vbyteDecodeUInt64(encodedDocumentIdDelta))
+		documentIdDelta := core.DocumentId(vbyteDecodeUInt64(encodedDocumentIdDelta))
 		positionMaybeDeltaMaybeAbsolute := vbyteDecodeUInt64(encodedPositionMaybeDeltaMaybeAbsolute)
 
 		documentId += documentIdDelta
 		if documentIdDelta == 0 {
-			position += misc.TermPosition(positionMaybeDeltaMaybeAbsolute)
+			position += core.TermPosition(positionMaybeDeltaMaybeAbsolute)
 		} else {
-			position = misc.TermPosition(positionMaybeDeltaMaybeAbsolute)
+			position = core.TermPosition(positionMaybeDeltaMaybeAbsolute)
 		}
 
-		invertedList.add(misc.TermTracker{
+		invertedList.add(core.TermTracker{
 			DocId:    documentId,
 			Position: position,
 		})

@@ -1,13 +1,13 @@
 package persistence
 
 import (
-	"quinto/misc"
+	"quinto/core"
 	"testing"
 )
 
 func TestAddToEmptySegment(t *testing.T) {
 	segment := newSegment()
-	tracker := misc.TermTracker{DocId: 1, Position: 2}
+	tracker := core.TermTracker{DocId: 1, Position: 2}
 	segment.add(tracker)
 	if segment.head == nil || segment.tail == nil {
 		t.Errorf("Expected segment to have head and tail, but they are nil")
@@ -34,8 +34,8 @@ func TestAddToEmptySegment(t *testing.T) {
 
 func TestAddToNonEmptySegment(t *testing.T) {
 	segment := newSegment()
-	tracker := misc.TermTracker{DocId: 1, Position: 2}
-	tracker2 := misc.TermTracker{DocId: 50, Position: 2}
+	tracker := core.TermTracker{DocId: 1, Position: 2}
+	tracker2 := core.TermTracker{DocId: 50, Position: 2}
 	segment.add(tracker)
 	segment.add(tracker2)
 	if segment.size != 2 {
@@ -63,8 +63,8 @@ func TestAddToNonEmptySegment(t *testing.T) {
 
 func TestAddToSegmentWithSameDocumentId(t *testing.T) {
 	segment := newSegment()
-	tracker := misc.TermTracker{DocId: 1, Position: 2}
-	tracker2 := misc.TermTracker{DocId: 50, Position: 2}
+	tracker := core.TermTracker{DocId: 1, Position: 2}
+	tracker2 := core.TermTracker{DocId: 50, Position: 2}
 	segment.add(tracker)
 	segment.add(tracker2)
 	segment.add(tracker)
@@ -82,9 +82,9 @@ func TestAddToSegmentWithSameDocumentId(t *testing.T) {
 
 func TestAddInTheMiddleOfSegment(t *testing.T) {
 	segment := newSegment()
-	tracker := misc.TermTracker{DocId: 1, Position: 2}
-	tracker3 := misc.TermTracker{DocId: 50, Position: 2}
-	tracker2 := misc.TermTracker{DocId: 25, Position: 2}
+	tracker := core.TermTracker{DocId: 1, Position: 2}
+	tracker3 := core.TermTracker{DocId: 50, Position: 2}
+	tracker2 := core.TermTracker{DocId: 25, Position: 2}
 	segment.add(tracker)
 	segment.add(tracker3)
 	segment.add(tracker2)

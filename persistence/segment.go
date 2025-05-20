@@ -18,7 +18,7 @@ package persistence
 import (
 	"iter"
 	"math"
-	"quinto/misc"
+	"quinto/core"
 	"unsafe"
 )
 
@@ -27,12 +27,12 @@ type segment struct {
 	tail *segmentNode
 
 	size              uint64
-	lowestDocumentId  misc.DocumentId
-	highestDocumentId misc.DocumentId
+	lowestDocumentId  core.DocumentId
+	highestDocumentId core.DocumentId
 }
 
 type segmentNode struct {
-	tracker misc.TermTracker
+	tracker core.TermTracker
 	next    *segmentNode
 }
 
@@ -56,8 +56,8 @@ func (seg *segment) estimateSize() int64 {
 	return int64(estimatedSize)
 }
 
-func (seg *segment) iterator() iter.Seq[misc.TermTracker] {
-	return func(yield func(misc.TermTracker) bool) {
+func (seg *segment) iterator() iter.Seq[core.TermTracker] {
+	return func(yield func(core.TermTracker) bool) {
 		for current := seg.head; current != nil; current = current.next {
 			if !yield(current.tracker) {
 				break
@@ -66,7 +66,7 @@ func (seg *segment) iterator() iter.Seq[misc.TermTracker] {
 	}
 }
 
-func (seg *segment) getInsertionPoint(tracker misc.TermTracker) **segmentNode {
+func (seg *segment) getInsertionPoint(tracker core.TermTracker) **segmentNode {
 	var insertionPoint **segmentNode = nil
 	for insertionPoint = &seg.head; *insertionPoint != nil; insertionPoint = &((*insertionPoint).next) {
 		overshootByDocumentId := (*insertionPoint).tracker.DocId > tracker.DocId
@@ -79,7 +79,7 @@ func (seg *segment) getInsertionPoint(tracker misc.TermTracker) **segmentNode {
 	return insertionPoint
 }
 
-func (seg *segment) add(tracker misc.TermTracker) {
+func (seg *segment) add(tracker core.TermTracker) {
 	var insertionPoint **segmentNode = seg.getInsertionPoint(tracker)
 	var newNextNode *segmentNode = nil
 	if *insertionPoint != nil {

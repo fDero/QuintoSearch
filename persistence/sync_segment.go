@@ -16,13 +16,13 @@ package persistence
 
 import (
 	"iter"
-	"quinto/misc"
+	"quinto/core"
 	"unsafe"
 )
 
 type synchronizedSegment struct {
 	underlyng segment
-	mutex     misc.WritersFirstRWMutex
+	mutex     core.WritersFirstRWMutex
 }
 
 func newSynchronizedSegment(seg *segment) *synchronizedSegment {
@@ -31,7 +31,7 @@ func newSynchronizedSegment(seg *segment) *synchronizedSegment {
 	}
 	return &synchronizedSegment{
 		underlyng: *seg,
-		mutex:     *misc.NewWritersFirstRWMutex(),
+		mutex:     *core.NewWritersFirstRWMutex(),
 	}
 }
 
@@ -41,15 +41,15 @@ func (syncseg *synchronizedSegment) estimateSize() int64 {
 	return int64(unsafe.Sizeof(syncseg.mutex)) + syncseg.underlyng.estimateSize()
 }
 
-func (syncseg *synchronizedSegment) iterator() iter.Seq[misc.TermTracker] {
-	return func(yield func(misc.TermTracker) bool) {
+func (syncseg *synchronizedSegment) iterator() iter.Seq[core.TermTracker] {
+	return func(yield func(core.TermTracker) bool) {
 		syncseg.mutex.RLock()
 		defer syncseg.mutex.RUnlock()
 		syncseg.underlyng.iterator()(yield)
 	}
 }
 
-func (syncseg *synchronizedSegment) add(tracker misc.TermTracker) {
+func (syncseg *synchronizedSegment) add(tracker core.TermTracker) {
 	syncseg.mutex.Lock()
 	defer syncseg.mutex.Unlock()
 	syncseg.underlyng.add(tracker)

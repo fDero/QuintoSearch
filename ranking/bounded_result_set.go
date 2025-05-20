@@ -18,16 +18,16 @@ package ranking
 
 import (
 	"iter"
+	"quinto/core"
 	"quinto/data"
-	"quinto/misc"
 )
 
 type BoundedResultSet struct {
-	storage *data.Heap[misc.SearchResult]
+	storage *data.Heap[core.SearchResult]
 	maxSize int
 }
 
-func compareResults(a, b misc.SearchResult) bool {
+func compareResults(a, b core.SearchResult) bool {
 	return a.DocId <= b.DocId
 }
 
@@ -38,15 +38,15 @@ func NewBoundedResultSet(maxSize int) *BoundedResultSet {
 	}
 }
 
-func (brs *BoundedResultSet) StoreNewResult(result misc.SearchResult) {
+func (brs *BoundedResultSet) StoreNewResult(result core.SearchResult) {
 	brs.storage.Push(result)
 	if brs.storage.Size() > brs.maxSize {
 		brs.storage.Pop()
 	}
 }
 
-func (brs *BoundedResultSet) ToSortedSlice() []misc.SearchResult {
-	var result = make([]misc.SearchResult, brs.storage.Size())
+func (brs *BoundedResultSet) ToSortedSlice() []core.SearchResult {
+	var result = make([]core.SearchResult, brs.storage.Size())
 	originalSize := brs.storage.Size()
 	newStorage := data.NewHeap(compareResults)
 	for i := originalSize - 1; i >= 0; i-- {
@@ -58,6 +58,6 @@ func (brs *BoundedResultSet) ToSortedSlice() []misc.SearchResult {
 	return result
 }
 
-func (brs *BoundedResultSet) Iterate() iter.Seq[misc.SearchResult] {
+func (brs *BoundedResultSet) Iterate() iter.Seq[core.SearchResult] {
 	return data.NewSliceIterator(brs.ToSortedSlice())
 }

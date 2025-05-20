@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"iter"
 	"os"
-	"quinto/misc"
+	"quinto/core"
 	"sync"
 
 	"github.com/dgraph-io/ristretto/v2"
@@ -52,7 +52,7 @@ func NewPersistenceManager(dbDirectory string) *PersistenceManager {
 	}
 }
 
-func (pm *PersistenceManager) StoreNewDocument(documentId misc.DocumentId, documentInputTokenStream iter.Seq[misc.Token]) {
+func (pm *PersistenceManager) StoreNewDocument(documentId core.DocumentId, documentInputTokenStream iter.Seq[core.Token]) {
 	segmentsForGivenTermInCurrentDocument := make(map[string]string)
 	for token := range documentInputTokenStream {
 		key, found := segmentsForGivenTermInCurrentDocument[token.StemmedText]
@@ -71,7 +71,7 @@ func (pm *PersistenceManager) StoreNewDocument(documentId misc.DocumentId, docum
 			}
 			pm.mutex.Unlock()
 		}
-		syncseg.add(misc.TermTracker{
+		syncseg.add(core.TermTracker{
 			DocId:    documentId,
 			Position: token.Position,
 		})
@@ -79,8 +79,8 @@ func (pm *PersistenceManager) StoreNewDocument(documentId misc.DocumentId, docum
 	}
 }
 
-func (pm *PersistenceManager) GetInvertedListIterator(term string) iter.Seq[misc.TermTracker] {
-	return func(yield func(misc.TermTracker) bool) {
+func (pm *PersistenceManager) GetInvertedListIterator(term string) iter.Seq[core.TermTracker] {
+	return func(yield func(core.TermTracker) bool) {
 		for counter := 0; true; counter++ {
 			currentKey := fmt.Sprint(term, "_", counter)
 			syncseg, found := pm.segments.Get(currentKey)
@@ -117,7 +117,7 @@ func (pm *PersistenceManager) fetchSegmentFromDisk(term string, blockCounter int
 	return nil, false
 }
 
-func (pm *PersistenceManager) getCacheKey(term string, documentId misc.DocumentId) string {
+func (pm *PersistenceManager) getCacheKey(term string, documentId core.DocumentId) string {
 	for counter := 0; true; counter++ {
 		currentKey := fmt.Sprint(term, "_", counter)
 		segment, found := pm.segments.Get(currentKey)
