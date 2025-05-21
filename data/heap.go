@@ -18,6 +18,15 @@ heap property, meaning that every parent node satisfies the ordering predicate
 with respect to its child nodes. When the ordering predicate is "less-than",
 the heap is called a "min-heap", and the smallest element is at the root. The
 root is always the element that gets peeked or popped from the heap.
+
+FAQ: why don't we use the `container/heap` package from the standard library?
+The `container/heap` package provides a non-generic interface that would allow
+us to implement an Heap struct ourselves, but it would require us to implement the
+`heap.Interface` interface, which is not generic (that package has been created
+before generics were introduced in Go 1.18). Moreover, it would require us to
+implement and expose public methods that we don't need, such as `Swap` and `Less`.
+Since all of these are inconveniences, we decided to implement our own Heap struct,
+which is generic and expose a minimal API.
 ==================================================================================*/
 
 package data
@@ -36,7 +45,7 @@ func NewHeap[T any](orderingPredicate func(a, b T) bool) *Heap[T] {
 
 func (h *Heap[T]) Push(value T) {
 	h.storage = append(h.storage, value)
-	h.siftUp()
+	h.shiftUp()
 }
 
 func (h *Heap[T]) Peek() (T, bool) {
@@ -56,7 +65,7 @@ func (h *Heap[T]) Pop() (T, bool) {
 	h.swap(0, n-1)
 	popped := h.storage[n-1]
 	h.storage = h.storage[:n-1]
-	h.siftDown(0, n-2)
+	h.shiftDown(0, n-2)
 	return popped, true
 }
 
@@ -64,7 +73,7 @@ func (h *Heap[T]) Size() int {
 	return len(h.storage)
 }
 
-func (h *Heap[T]) siftDown(currentIdx int, endIdx int) {
+func (h *Heap[T]) shiftDown(currentIdx int, endIdx int) {
 	leftChildIdx := currentIdx*2 + 1
 	for leftChildIdx <= endIdx {
 
@@ -89,7 +98,7 @@ func (h *Heap[T]) siftDown(currentIdx int, endIdx int) {
 	}
 }
 
-func (h *Heap[T]) siftUp() {
+func (h *Heap[T]) shiftUp() {
 	currentIdx := h.Size() - 1
 	parentIdx := (currentIdx - 1) / 2
 	for h.compareAtIndex(currentIdx, parentIdx) {
