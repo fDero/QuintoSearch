@@ -1,3 +1,18 @@
+/*=================================== LICENSE =======================================
+
+                                   Apache License
+                             Version 2.0, January 2004
+                          http://www.apache.org/licenses/
+
+============================== BRIEF FILE DESCRIPTION ===============================
+
+This file contains a simple implementation of a sorted array data structure. It's
+basically a wrapper around a slice that maintains the order of the elements according
+to a user-defined ordering predicate. The sorted array supports insertion, removal,
+and searching for elements. It also provides a way to iterate over the elements in
+the array (in ascending order) using an iterator.
+==================================================================================*/
+
 package data
 
 import (
