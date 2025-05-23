@@ -23,17 +23,20 @@ func NewSortedArray[T any](
 }
 
 func (sa *SortedArray[T]) findIndexOf(value T) (int, bool) {
-
-	for i, v := range sa.storage {
-		if sa.equalityPredicate(v, value) {
-			return i, true
-		}
-		if !sa.orderingPredicate(v, value) {
-			return i, false
+	low, high := 0, len(sa.storage)-1
+	for low <= high {
+		pivotIndex := (low + high) / 2
+		pivotValue := sa.storage[pivotIndex]
+		switch {
+		case sa.equalityPredicate(pivotValue, value):
+			return pivotIndex, true
+		case sa.orderingPredicate(pivotValue, value):
+			high = pivotIndex - 1
+		default:
+			low = pivotIndex + 1
 		}
 	}
-
-	return len(sa.storage), false
+	return low, false
 }
 
 func (sa *SortedArray[T]) Insert(value T) {
