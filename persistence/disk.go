@@ -16,15 +16,15 @@ space efficiency and fast read/write operations.
 package persistence
 
 import (
-	"bufio"
 	"io"
+	"iter"
 	"quinto/core"
 )
 
-func StoreOnDisk(fileWriter *bufio.Writer, invertedList *segment) error {
+func encodeTermTrackersToDisk(fileWriter io.Writer, invertedListIterator iter.Seq[core.TermTracker]) error {
 	lastDocumentId := core.DocumentId(0)
 	lastPosition := core.TermPosition(0)
-	for tracker := range invertedList.iterator() {
+	for tracker := range invertedListIterator {
 
 		documentIdDelta := tracker.DocId - lastDocumentId
 		positionDelta := tracker.Position - lastPosition
@@ -50,8 +50,7 @@ func StoreOnDisk(fileWriter *bufio.Writer, invertedList *segment) error {
 	return nil
 }
 
-func LoadFromDisk(fileReader *bufio.Reader) (*segment, error) {
-	var invertedList *segment = newSegment()
+func processTermTrackersFromDisk(fileReader io.ByteReader, yield func(core.TermTracker) bool) error {
 
 	documentId := core.DocumentId(0)
 	position := core.TermPosition(0)
@@ -59,15 +58,15 @@ func LoadFromDisk(fileReader *bufio.Reader) (*segment, error) {
 	for {
 		encodedDocumentIdDelta, idErr := loadVbyteEncodedUInt64(fileReader)
 		if idErr == io.EOF {
-			return invertedList, nil
+			return nil
 		}
 		if idErr != nil {
-			return invertedList, idErr
+			return idErr
 		}
 
 		encodedPositionMaybeDeltaMaybeAbsolute, posErr := loadVbyteEncodedUInt64(fileReader)
 		if posErr != nil {
-			return invertedList, posErr
+			return posErr
 		}
 
 		documentIdDelta := core.DocumentId(vbyteDecodeUInt64(encodedDocumentIdDelta))
@@ -80,9 +79,19 @@ func LoadFromDisk(fileReader *bufio.Reader) (*segment, error) {
 			position = core.TermPosition(positionMaybeDeltaMaybeAbsolute)
 		}
 
-		invertedList.add(core.TermTracker{
+		keepGoing := yield(core.TermTracker{
 			DocId:    documentId,
 			Position: position,
 		})
+
+		if !keepGoing {
+			return nil
+		}
+	}
+}
+
+func iterateTermTrackersFromDisk(fileReader io.ByteReader) iter.Seq[core.TermTracker] {
+	return func(yield func(core.TermTracker) bool) {
+		processTermTrackersFromDisk(fileReader, yield)
 	}
 }

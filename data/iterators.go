@@ -20,6 +20,14 @@ import (
 	"strings"
 )
 
+func CollectAsSlice[T any](seq iter.Seq[T]) []T {
+	var result []T
+	for value := range seq {
+		result = append(result, value)
+	}
+	return result
+}
+
 func NewSliceIterator[T any](slice []T) iter.Seq[T] {
 	return func(yield func(T) bool) {
 		for _, value := range slice {

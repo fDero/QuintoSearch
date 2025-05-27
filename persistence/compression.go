@@ -27,7 +27,7 @@ is likely to be small, and thus the v-byte encoding will be efficient.
 package persistence
 
 import (
-	"bufio"
+	"io"
 	"slices"
 )
 
@@ -56,7 +56,7 @@ func vbyteDecodeUInt64(encoded []byte) uint64 {
 	return decoded
 }
 
-func loadVbyteEncodedUInt64(fileReader *bufio.Reader) ([]byte, error) {
+func loadVbyteEncodedUInt64(fileReader io.ByteReader) ([]byte, error) {
 	var encoded []byte
 	encodedByte, err := fileReader.ReadByte()
 	for ; err == nil; encodedByte, err = fileReader.ReadByte() {
