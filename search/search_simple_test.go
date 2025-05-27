@@ -34,10 +34,10 @@ func runTestQueryHelper(t *testing.T, queryString string, success bool) {
 	tokenIterator := data.NewSliceIterator(helloWorldDocument)
 	index.StoreNewDocument(tokenIterator)
 
-	queryFragments := SplitQuery(queryString)
-	query, err := ParseQuery(queryFragments)
-	if err != nil {
-		t.Fatalf("Failed to parse query: %v", err)
+	queryFragments, err1 := SplitQuery(queryString)
+	query, err2 := ParseQuery(queryFragments)
+	if err1 != nil || err2 != nil {
+		t.Fatalf("Failed to parse query: %v %v", err1, err2)
 	}
 
 	query.Init(index)

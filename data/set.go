@@ -32,6 +32,14 @@ func NewSet[T comparable]() Set[T] {
 	}
 }
 
+func SliceToSet[T comparable](values []T) *Set[T] {
+	set := NewSet[T]()
+	for _, value := range values {
+		set.InsertOne(value)
+	}
+	return &set
+}
+
 func (s *Set[T]) InsertOne(value T) {
 	s.storage[value] = true
 }

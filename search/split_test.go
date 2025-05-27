@@ -6,7 +6,11 @@ import (
 
 func TestSplitQuery(t *testing.T) {
 	queryString := "a OR (b NEAR:ORD:10 c)"
-	fragments := SplitQuery(queryString)
+	fragments, err := SplitQuery(queryString)
+
+	if err != nil {
+		t.Fatalf("Failed to split query: %v", err)
+	}
 
 	if len(fragments) != 7 {
 		t.Fatalf("Expected 7 fragments, got %d", len(fragments))
@@ -43,10 +47,14 @@ func TestSplitQuery(t *testing.T) {
 
 func TestComplexSplitting(t *testing.T) {
 	queryString := "NEAR:ORD:10 AND:ORD NEAR:3"
-	fragments := SplitQuery(queryString)
+	fragments, err := SplitQuery(queryString)
+
+	if err != nil {
+		t.Fatalf("Failed to split query: %v", err)
+	}
 
 	if len(fragments) != 3 {
-		t.Fatalf("Expected 7 fragments, got %d", len(fragments))
+		t.Fatalf("Expected 3 fragments, got %d", len(fragments))
 	}
 
 	if fragments[0].txt != "NEAR" {
@@ -83,5 +91,40 @@ func TestComplexSplitting(t *testing.T) {
 
 	if fragments[2].opt != 3 {
 		t.Errorf("Expected fragment 'NEAR' to have option = 3, instead got %v", fragments[2].opt)
+	}
+}
+
+func TestBadSplittingErrorRecovery(t *testing.T) {
+	queryString := "mike ZAPP robert"
+	fragments, err := SplitQuery(queryString)
+
+	if err == nil {
+		t.Logf("Parsed fragments: %v", fragments)
+		t.Fatalf("Expected an error due to bad query syntax, but got none")
+	}
+
+	queryString = "mike NEAR:GROBB robert"
+	fragments, err = SplitQuery(queryString)
+
+	if err == nil {
+		t.Logf("Parsed fragments: %v", fragments)
+		t.Fatalf("Expected an error due to bad query syntax, but got none")
+	}
+
+	queryString = "mike NEAR:Z:10 robert"
+	fragments, err = SplitQuery(queryString)
+
+	if err == nil {
+		t.Logf("Parsed fragments: %v", fragments)
+		t.Fatalf("Expected an error due to bad query syntax, but got none")
+	}
+
+	
+	queryString = "mike NEAR:ORD:10:B robert"
+	fragments, err = SplitQuery(queryString)
+
+	if err == nil {
+		t.Logf("Parsed fragments: %v", fragments)
+		t.Fatalf("Expected an error due to bad query syntax, but got none")
 	}
 }
