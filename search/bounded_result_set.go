@@ -14,7 +14,7 @@ reached, it will remove the least relevant result. The results are stored in a
 heap, which allows for efficient insertion and removal of elements.
 ==================================================================================*/
 
-package ranking
+package search
 
 import (
 	"iter"
