@@ -63,7 +63,6 @@ func extractSimpleQueryFragment(query string, index *int, fragments *[]queryFrag
 func extractComplexQueryFragment(query string, index *int, fragments *[]queryFragment) error {
 	fragmentRegex := regexp.MustCompile(`([A-Z]+)(?::([A-Z]+))?(?::(\d+))?`)
 	matches := fragmentRegex.FindStringSubmatch(query[*index:])
-
 	opt := 0
 	if matches[3] != "" {
 		var err error
@@ -72,22 +71,18 @@ func extractComplexQueryFragment(query string, index *int, fragments *[]queryFra
 			return err
 		}
 	}
-
 	allowedOperators := []string{"AND", "OR", "XOR", "NEAR", "NOT"}
 	if !data.SliceToSet(allowedOperators).Contains(matches[1]) {
 		return errors.New("invalid operator in complex query fragment: " + matches[1])
 	}
-
 	if matches[2] != "" && matches[2] != "ORD" {
 		return errors.New("invalid order specifier in complex query fragment: " + matches[2])
 	}
-
 	result := queryFragment{
 		txt: matches[1],
 		ord: matches[2] == "ORD",
 		opt: opt,
 	}
-
 	*fragments = append(*fragments, result)
 	*index += len(matches[0])
 	return nil
@@ -97,31 +92,24 @@ func SplitQuery(query string) ([]queryFragment, error) {
 	var fragments []queryFragment
 	var err error = nil
 	for index := 0; index < len(query) && err == nil; {
-
 		char := query[index]
-
 		if char == ' ' || char == '\t' || char == '\n' || char == '\r' {
 			index++
 			continue
 		}
-
 		if char >= 'a' && char <= 'z' {
 			err = extractSimpleQueryFragment(query, &index, &fragments)
 			continue
 		}
-
 		if char >= 'A' && char <= 'Z' {
 			err = extractComplexQueryFragment(query, &index, &fragments)
 			continue
 		}
-
 		if char == '(' || char == ')' {
 			err = extractParenthesis(query, &index, &fragments)
 			continue
 		}
-
 		err = errors.New("invalid character in query: " + string(char))
 	}
-
 	return fragments, err
 }
