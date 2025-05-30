@@ -37,6 +37,22 @@ func NewSortedArray[T any](
 	}
 }
 
+func (sa *SortedArray[T]) Lowest() (T, bool) {
+	if len(sa.storage) == 0 {
+		var zero T
+		return zero, false
+	}
+	return sa.storage[0], true
+}
+
+func (sa *SortedArray[T]) Highest() (T, bool) {
+	if len(sa.storage) == 0 {
+		var zero T
+		return zero, false
+	}
+	return sa.storage[len(sa.storage)-1], true
+}
+
 func (sa *SortedArray[T]) findIndexOf(value T) (int, bool) {
 	low, high := 0, len(sa.storage)-1
 	for low <= high {
@@ -54,7 +70,7 @@ func (sa *SortedArray[T]) findIndexOf(value T) (int, bool) {
 	return low, false
 }
 
-func (sa *SortedArray[T]) Insert(value T) {
+func (sa *SortedArray[T]) Insert(value T) bool {
 	index, found := sa.findIndexOf(value)
 	if !found {
 		sa.storage = append(sa.storage, value)
@@ -63,13 +79,15 @@ func (sa *SortedArray[T]) Insert(value T) {
 		}
 		sa.storage[index] = value
 	}
+	return !found
 }
 
-func (sa *SortedArray[T]) Remove(value T) {
+func (sa *SortedArray[T]) Remove(value T) bool {
 	index, found := sa.findIndexOf(value)
 	if found {
 		sa.storage = slices.Delete(sa.storage, index, index+1)
 	}
+	return found
 }
 
 func (sa *SortedArray[T]) Size() int {
