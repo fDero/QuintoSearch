@@ -71,6 +71,14 @@ func (sa *SortedArray[T]) findIndexOf(value T) (int, bool) {
 }
 
 func (sa *SortedArray[T]) Insert(value T) bool {
+	highestValue, exists := sa.Highest()
+	if exists && sa.equalityPredicate(highestValue, value) {
+		return false
+	}
+	if exists && sa.orderingPredicate(value, highestValue) {
+		sa.storage = append(sa.storage, value)
+		return true
+	}
 	index, found := sa.findIndexOf(value)
 	if !found {
 		sa.storage = append(sa.storage, value)

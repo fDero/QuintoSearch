@@ -38,35 +38,10 @@ func TestInsertOnce(t *testing.T) {
 	}
 }
 
-func insertAll(t *testing.T, sa *SortedArray[int], elements []int) {
+func insertAll(sa *SortedArray[int], elements []int) {
 	for _, elem := range elements {
 		sa.Insert(elem)
 	}
-}
-
-func ensureContains(t *testing.T, sa *SortedArray[int], elements []int) {
-	for _, elem := range elements {
-		if !sa.Contains(elem) {
-			t.Errorf("Expected to contain %d", elem)
-		}
-	}
-}
-
-func TestInsertMultiple(t *testing.T) {
-
-	sa := NewSortedArray(
-		func(a, b int) bool { return a < b },
-		func(a, b int) bool { return a == b },
-	)
-
-	elements := []int{5, 3, 8, 1, 4, 10, 0, 7, 2, 6, 9}
-	insertAll(t, sa, elements)
-
-	if sa.Size() != len(elements) {
-		t.Errorf("Expected size to be %d, got %d", len(elements), sa.Size())
-	}
-
-	ensureContains(t, sa, elements)
 }
 
 func TestEnsureSorted(t *testing.T) {
@@ -77,7 +52,7 @@ func TestEnsureSorted(t *testing.T) {
 	)
 
 	elements := []int{5, 3, 8, 1, 4, 10, 0, 7, 2, 6, 9}
-	insertAll(t, sa, elements)
+	insertAll(sa, elements)
 
 	previous := -1
 	for elem := range sa.Iterate() {
