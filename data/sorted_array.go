@@ -62,9 +62,9 @@ func (sa *SortedArray[T]) findIndexOf(value T) (int, bool) {
 		case sa.equalityPredicate(pivotValue, value):
 			return pivotIndex, true
 		case sa.orderingPredicate(pivotValue, value):
-			high = pivotIndex - 1
-		default:
 			low = pivotIndex + 1
+		default:
+			high = pivotIndex - 1
 		}
 	}
 	return low, false
@@ -75,7 +75,7 @@ func (sa *SortedArray[T]) Insert(value T) bool {
 	if exists && sa.equalityPredicate(highestValue, value) {
 		return false
 	}
-	if exists && sa.orderingPredicate(value, highestValue) {
+	if exists && sa.orderingPredicate(highestValue, value) {
 		sa.storage = append(sa.storage, value)
 		return true
 	}
@@ -96,6 +96,18 @@ func (sa *SortedArray[T]) Remove(value T) bool {
 		sa.storage = slices.Delete(sa.storage, index, index+1)
 	}
 	return found
+}
+
+func (sa *SortedArray[T]) RemoveIf(predicate func(T) bool) bool {
+	altered := false
+	for i := 0; i < len(sa.storage); i++ {
+		if predicate(sa.storage[i]) {
+			sa.storage = slices.Delete(sa.storage, i, i+1)
+			altered = true
+			i-- // Adjust index after deletion
+		}
+	}
+	return altered
 }
 
 func (sa *SortedArray[T]) Size() int {

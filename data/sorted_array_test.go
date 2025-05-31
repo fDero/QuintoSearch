@@ -1,6 +1,7 @@
 package data
 
 import (
+	"sort"
 	"testing"
 )
 
@@ -100,5 +101,50 @@ func TestEnsureSortedEvenAfterRemove(t *testing.T) {
 
 	if sa.Size() != len(elements)-3 {
 		t.Errorf("Expected size to be %d, got %d", len(elements)-3, sa.Size())
+	}
+}
+
+func TestGetByIndex(t *testing.T) {
+
+	orderingPredicate := func(a, b int) bool { return a < b }
+	equalityPredicate := func(a, b int) bool { return a == b }
+	sa := NewSortedArray(orderingPredicate, equalityPredicate)
+
+	elements := []int{5, 3, 8}
+
+	insertAll(sa, elements)
+
+	if sa.Size() != 3 {
+		t.Errorf("Expected size to be 3, got %d", sa.Size())
+	}
+
+	sort.Slice(elements, func(i, j int) bool {
+		return orderingPredicate(elements[i], elements[j])
+	})
+
+	for i, expected := range elements {
+		if extracted := sa.storage[i]; extracted != expected {
+			t.Errorf("Expected second element to be %d, got %d", expected, extracted)
+		}
+	}
+}
+
+func TestRemoveIf(t *testing.T) {
+	sa := NewSortedArray(
+		func(a, b int) bool { return a < b },
+		func(a, b int) bool { return a == b },
+	)
+
+	elements := []int{5, 3, 8, 1, 4, 10, 0, 7, 2, 6, 9}
+	insertAll(sa, elements)
+
+	sa.RemoveIf(func(value int) bool {
+		return value > 5
+	})
+
+	for item := range sa.Iterate() {
+		if item > 5 {
+			t.Errorf("Expected no items greater than 5, found %d", item)
+		}
 	}
 }
