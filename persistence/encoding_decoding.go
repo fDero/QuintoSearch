@@ -6,11 +6,12 @@
 
 ============================== BRIEF FILE DESCRIPTION ===============================
 
-Storing and loading inverted lists on/from disk is a crucial part of the persistence
-layer. This file contains the functions that are used to store and load inverted lists
-from disk. The inverted lists are stored in a custom binary format that uses v-byte
-encoding to compress the document IDs and positions. This format is optimized for
-space efficiency and fast read/write operations.
+Storing and loading data on/from disk is a crucial part of the persistence layer.
+This file contains the functions that are used to store and load data from disk. The
+API is designed around the `persistence.diskHandler` interface, which provides a
+layer of abstraction over the disk operations. This turns out to be useful for
+testing purposes, as it allows us to mock the disk operations and test the
+persistence layer without actually writing to disk.
 ==================================================================================*/
 
 package persistence
@@ -20,6 +21,17 @@ import (
 	"iter"
 	"quinto/core"
 )
+
+func encodeStringToDisk(fileWriter io.Writer, text string) error {
+	encodedLen := vbyteEncodeUInt64(uint64(len(text)))
+	if _, err := fileWriter.Write(encodedLen); err != nil {
+		return err
+	}
+	if _, err := fileWriter.Write([]byte(text)); err != nil {
+		return err
+	}
+	return nil
+}
 
 func encodeTermTrackersToDisk(fileWriter io.Writer, invertedListIterator iter.Seq[core.TermTracker]) error {
 	lastDocumentId := core.DocumentId(0)
@@ -48,6 +60,22 @@ func encodeTermTrackersToDisk(fileWriter io.Writer, invertedListIterator iter.Se
 		lastPosition = tracker.Position
 	}
 	return nil
+}
+
+func decodeStringFromDisk(fileReader io.ByteReader) (string, error) {
+	encodedLen, err := loadVbyteEncodedUInt64(fileReader)
+	decodedLen := vbyteDecodeUInt64(encodedLen)
+	if err != nil || decodedLen == 0 {
+		return "", err
+	}
+	bytes := make([]byte, decodedLen)
+	for i := range decodedLen {
+		bytes[i], err = fileReader.ReadByte()
+		if err != nil {
+			return "", err
+		}
+	}
+	return string(bytes), nil
 }
 
 func processTermTrackersFromDisk(fileReader io.ByteReader, yield func(core.TermTracker) bool) error {

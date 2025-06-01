@@ -84,3 +84,24 @@ func TestWritingAndReadingMultipleElementsExtended(t *testing.T) {
 		t.Errorf("Expected %d elements in the output, got %d elements", len(input), len(output))
 	}
 }
+
+func TestEncodeDecodeString(t *testing.T) {
+	samples := []string{
+		"", "hello", "quinto", "120\n", "aaaa \n \raaa \r",
+		"a very long string that exceeds the usual length",
+	}
+	for _, sample := range samples {
+		buffer := new(bytes.Buffer)
+		if err := encodeStringToDisk(buffer, sample); err != nil {
+			t.Fatalf("Failed to encode string: %v", err)
+		}
+		reader := bytes.NewReader(buffer.Bytes())
+		result, err := decodeStringFromDisk(reader)
+		if err != nil {
+			t.Fatalf("Failed to decode string: %v", err)
+		}
+		if result != sample {
+			t.Errorf("Expected '%s', got '%s'", sample, result)
+		}
+	}
+}
