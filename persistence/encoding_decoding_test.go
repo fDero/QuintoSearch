@@ -19,15 +19,23 @@ func TestWritingAndReadingEmpty(t *testing.T) {
 }
 
 func TestWritingAndReadingOneElement(t *testing.T) {
-	buffer := new(bytes.Buffer)
-	inputIterator := data.NewSliceIterator([]core.TermTracker{
+	input := []core.TermTracker{
 		{DocId: 1, Position: 2},
-	})
+	}
+
+	buffer := new(bytes.Buffer)
+	inputIterator := data.NewSliceIterator(input)
 	encodeTermTrackersToDisk(buffer, inputIterator)
 	output := data.CollectAsSlice(iterateTermTrackersFromDisk(buffer))
 
 	if len(output) != 1 {
 		t.Errorf("Expected one element in the output, got %d elements", len(output))
+	}
+
+	badDocId := output[0].DocId != input[0].DocId
+	badPosition := output[0].Position != input[0].Position
+	if badDocId || badPosition {
+		t.Errorf("Expected %v, got %v", input[0], output[0])
 	}
 }
 
@@ -50,6 +58,12 @@ func TestWritingAndReadingMultipleElements(t *testing.T) {
 
 	if len(output) != len(input) {
 		t.Errorf("Expected %d elements in the output, got %d elements", len(input), len(output))
+	}
+
+	for in, out := range data.ZipSlices(input, output) {
+		if in.DocId != out.DocId || in.Position != out.Position {
+			t.Errorf("Mismatch: expected %v, got %v", in, out)
+		}
 	}
 }
 

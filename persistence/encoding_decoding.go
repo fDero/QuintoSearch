@@ -102,9 +102,9 @@ func processTermTrackersFromDisk(fileReader io.ByteReader, yield func(core.TermT
 
 		documentId += documentIdDelta
 		if documentIdDelta == 0 {
-			position += core.TermPosition(positionMaybeDeltaMaybeAbsolute)
-		} else {
 			position = core.TermPosition(positionMaybeDeltaMaybeAbsolute)
+		} else {
+			position += core.TermPosition(positionMaybeDeltaMaybeAbsolute)
 		}
 
 		keepGoing := yield(core.TermTracker{
