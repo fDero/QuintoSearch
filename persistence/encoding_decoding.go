@@ -42,7 +42,7 @@ func encodeTermTrackersToDisk(fileWriter io.Writer, invertedListIterator iter.Se
 		positionDelta := tracker.Position - lastPosition
 
 		positionToEncode := positionDelta
-		if documentIdDelta == 0 {
+		if documentIdDelta != 0 {
 			positionToEncode = tracker.Position
 		}
 
@@ -101,7 +101,7 @@ func processTermTrackersFromDisk(fileReader io.ByteReader, yield func(core.TermT
 		positionMaybeDeltaMaybeAbsolute := vbyteDecodeUInt64(encodedPositionMaybeDeltaMaybeAbsolute)
 
 		documentId += documentIdDelta
-		if documentIdDelta == 0 {
+		if documentIdDelta != 0 {
 			position = core.TermPosition(positionMaybeDeltaMaybeAbsolute)
 		} else {
 			position += core.TermPosition(positionMaybeDeltaMaybeAbsolute)
