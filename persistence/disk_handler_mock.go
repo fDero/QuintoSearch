@@ -15,14 +15,19 @@ func newMockDiskHandler() *mockDiskHandler {
 	}
 }
 
-func (m *mockDiskHandler) getWriter(key string) (io.Writer, func(), error) {
-	if _, exists := m.mainBuffers[key]; !exists {
-		m.mainBuffers[key] = new(bytes.Buffer)
+func (m *mockDiskHandler) getWriter(key string) (writer io.Writer, finalize func(), err error) {
+	tmpBuffer := new(bytes.Buffer)
+	finalize = func() {
+		m.mainBuffers[key] = tmpBuffer
 	}
-	return m.mainBuffers[key], func() {}, nil
+	return tmpBuffer, finalize, nil
 }
 
-func (m *mockDiskHandler) getReader(key string) (io.ByteReader, bool) {
-	mainBuffer, exists := m.mainBuffers[key]
-	return bytes.NewReader(mainBuffer.Bytes()), exists
+func (m *mockDiskHandler) getReader(key string) (reader io.ByteReader, exists bool) {
+	mainBuffer, ok := m.mainBuffers[key]
+	if !ok {
+		m.mainBuffers[key] = new(bytes.Buffer)
+		mainBuffer = m.mainBuffers[key]
+	}
+	return bytes.NewReader(mainBuffer.Bytes()), ok
 }
