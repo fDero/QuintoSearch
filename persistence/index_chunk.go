@@ -8,7 +8,8 @@
 
 This file contains the implementation of `indexChunk`, which is wrapper around a
 sorted array of `core.TermTracker` objects. It is supposed to be the smallest unit
-in which a full inverted list is stored. An `indexChunk` must be read and written
+in which a full inverted list can be concurrently accessed. A full inverted list is
+composed of one or more index chunks. An `indexChunk` must be read and written
 on disk. Multiple readers can read from it concurrently, but only one writer can
 update it. After an update, the `indexChunk` must be written back to disk.
 ==================================================================================*/
