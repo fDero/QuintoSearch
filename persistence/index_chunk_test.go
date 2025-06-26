@@ -39,10 +39,6 @@ func TestIndexChunkWriteAndRead(t *testing.T) {
 
 	readerChunk := newIndexChunk("hello", "testChunk", handler)
 
-	if readerChunk.termAsText != "hello" {
-		t.Errorf("Expected termAsText to be 'hello', got '%s'", readerChunk.termAsText)
-	}
-
 	if readerChunk.chunkKey != "testChunk" {
 		t.Errorf("Expected chunkKey to be 'testChunk', got '%s'", readerChunk.chunkKey)
 	}

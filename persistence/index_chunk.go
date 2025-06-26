@@ -24,7 +24,6 @@ import (
 
 type indexChunk struct {
 	termTrackers     data.SortedArray[core.TermTracker]
-	termAsText       string
 	chunkKey         string
 	nextChunkKey     string
 	pendingWriteBack bool
@@ -55,7 +54,6 @@ func newSortedArrayOfTermTrackers() data.SortedArray[core.TermTracker] {
 func newIndexChunk(term string, chunkKey string, handler diskHandler) *indexChunk {
 	chunk := &indexChunk{
 		termTrackers:     newSortedArrayOfTermTrackers(),
-		termAsText:       term,
 		chunkKey:         chunkKey,
 		nextChunkKey:     "",
 		pendingWriteBack: false,
@@ -66,9 +64,8 @@ func newIndexChunk(term string, chunkKey string, handler diskHandler) *indexChun
 	if !exists || reader == nil {
 		return chunk
 	}
-	errors := [3]error{}
-	chunk.termAsText, errors[0] = decodeStringFromDisk(reader)
-	chunk.chunkKey, errors[2] = decodeStringFromDisk(reader)
+	errors := [2]error{}
+	chunk.chunkKey, errors[0] = decodeStringFromDisk(reader)
 	chunk.nextChunkKey, errors[1] = decodeStringFromDisk(reader)
 	panicWhenSomeErrorsOccurred(errors[:])
 	for tracker := range iterateTermTrackersFromDisk(reader) {
@@ -85,7 +82,6 @@ func (chunk *indexChunk) writeBack() {
 	}
 	writer, finalize, _ := chunk.handler.getWriter(chunk.chunkKey)
 	defer finalize()
-	encodeStringToDisk(writer, chunk.termAsText)
 	encodeStringToDisk(writer, chunk.chunkKey)
 	encodeStringToDisk(writer, chunk.nextChunkKey)
 	encodeTermTrackersToDisk(writer, chunk.iterate())
