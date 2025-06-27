@@ -33,11 +33,11 @@ func TestIndexChunkWriteAndRead(t *testing.T) {
 	}
 
 	var handler diskHandler = newMockDiskHandler()
-	writerChunk := newIndexChunk("hello", "testChunk", handler)
+	writerChunk := newIndexChunk("testChunk", handler)
 	writerChunk.insertIterable(data.NewSliceIterator(termTrackers))
 	writerChunk.writeBack()
 
-	readerChunk := newIndexChunk("hello", "testChunk", handler)
+	readerChunk := newIndexChunk("testChunk", handler)
 
 	if readerChunk.chunkKey != "testChunk" {
 		t.Errorf("Expected chunkKey to be 'testChunk', got '%s'", readerChunk.chunkKey)

@@ -51,7 +51,7 @@ func newSortedArrayOfTermTrackers() data.SortedArray[core.TermTracker] {
 	return *data.NewSortedArray(orderingPredicate, equalityPredicate)
 }
 
-func newIndexChunk(term string, chunkKey string, handler diskHandler) *indexChunk {
+func newIndexChunk(chunkKey string, handler diskHandler) *indexChunk {
 	chunk := &indexChunk{
 		termTrackers:     newSortedArrayOfTermTrackers(),
 		chunkKey:         chunkKey,
