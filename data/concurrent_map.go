@@ -41,3 +41,8 @@ func (m *ConcurrentMap[K, V]) Get(key K) (V, bool) {
 func (m *ConcurrentMap[K, V]) Delete(key K) {
 	m.storage.Delete(key)
 }
+
+func (m *ConcurrentMap[K, V]) Contains(key K) bool {
+	_, exists := m.storage.Load(key)
+	return exists
+}

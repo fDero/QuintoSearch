@@ -27,7 +27,7 @@ type concurrentStackNode[T any] struct {
 	value T
 }
 
-func NewLockfreeStack[T any]() *ConcurrentStack[T] {
+func NewConcurrentStack[T any]() *ConcurrentStack[T] {
 	return &ConcurrentStack[T]{}
 }
 
