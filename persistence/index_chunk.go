@@ -19,7 +19,6 @@ package persistence
 import (
 	"iter"
 	"quinto/core"
-	"quinto/concurrency"
 	"quinto/data"
 )
 
@@ -29,7 +28,7 @@ type indexChunk struct {
 	nextChunkKey     string
 	pendingWriteBack bool
 	handler          diskHandler
-	rwMutex          concurrency.ReadWriteMutex
+	rwMutex          core.ReadWriteMutex
 }
 
 func panicWhenSomeErrorsOccurred(err []error) {
@@ -59,7 +58,7 @@ func newIndexChunk(chunkKey string, handler diskHandler) *indexChunk {
 		nextChunkKey:     "",
 		pendingWriteBack: false,
 		handler:          handler,
-		rwMutex:          concurrency.NewWritersFirstRWMutex(),
+		rwMutex:          core.NewWritersFirstRWMutex(),
 	}
 	reader, exists := handler.getReader(chunkKey)
 	if !exists || reader == nil {
