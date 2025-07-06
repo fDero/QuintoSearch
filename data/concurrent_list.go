@@ -55,6 +55,7 @@ func NewLinkedList[T any]() *ConcurrentList[T] {
 
 func (list *ConcurrentList[T]) InsertFront(value T) ConcurrentListEntry[T] {
 	newNode := &concurrentListNode[T]{item: value}
+	defer list.node_count.Add(1)
 	if list.tail.Load() == nil {
 		list.structure_mutex.Lock()
 		defer list.structure_mutex.Unlock()
@@ -117,6 +118,12 @@ func (list *ConcurrentList[T]) attemptPrune() {
 	defer list.structure_mutex.Unlock()
 	cursor := list.head.Load()
 	for cursor != nil {
+		if cursor.mark.Load() && cursor.prev == nil {
+			list.head.Store(cursor.next)
+		}
+		if cursor.mark.Load() && cursor.next == nil {
+			list.tail.Store(cursor.prev)
+		}
 		if cursor.mark.Load() && cursor.prev != nil {
 			cursor.prev.next = cursor.next
 		}
