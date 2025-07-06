@@ -66,9 +66,9 @@ func (list *ConcurrentList[T]) InsertFront(value T) ConcurrentListEntry[T] {
 		list.tail.Store(newNode)
 		return ConcurrentListEntry[T]{list: list, ptr: newNode}
 	}
+	list.structure_mutex.RLock()
+	defer list.structure_mutex.RUnlock()
 	for {
-		list.structure_mutex.RLock()
-		defer list.structure_mutex.RUnlock()
 		currentHead := list.head.Load()
 		newNode.next = currentHead
 		if list.head.CompareAndSwap(currentHead, newNode) {
