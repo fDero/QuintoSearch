@@ -34,7 +34,7 @@ type ConcurrentList[T any] struct {
 	head atomic.Pointer[concurrentListNode[T]]
 	tail atomic.Pointer[concurrentListNode[T]]
 
-	structure_mutex sync.Mutex
+	structure_mutex sync.RWMutex
 	node_count      atomic.Int64
 	marked_count    atomic.Int64
 	rm_threshold    float64
@@ -48,7 +48,9 @@ type concurrentListNode[T any] struct {
 }
 
 func NewLinkedList[T any]() *ConcurrentList[T] {
-	return &ConcurrentList[T]{}
+	return &ConcurrentList[T]{
+		rm_threshold: 0.4,
+	}
 }
 
 func (list *ConcurrentList[T]) InsertFront(value T) ConcurrentListEntry[T] {
@@ -64,6 +66,8 @@ func (list *ConcurrentList[T]) InsertFront(value T) ConcurrentListEntry[T] {
 		return ConcurrentListEntry[T]{list: list, ptr: newNode}
 	}
 	for {
+		list.structure_mutex.RLock()
+		defer list.structure_mutex.RUnlock()
 		currentHead := list.head.Load()
 		newNode.next = currentHead
 		if list.head.CompareAndSwap(currentHead, newNode) {
