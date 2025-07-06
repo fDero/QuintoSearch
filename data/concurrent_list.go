@@ -41,8 +41,8 @@ type ConcurrentList[T any] struct {
 }
 
 type concurrentListNode[T any] struct {
-	next *concurrentListNode[T]
-	prev *concurrentListNode[T]
+	next atomic.Pointer[concurrentListNode[T]]
+	prev atomic.Pointer[concurrentListNode[T]]
 	mark atomic.Bool
 	item T
 }
@@ -70,9 +70,9 @@ func (list *ConcurrentList[T]) InsertFront(value T) ConcurrentListEntry[T] {
 	defer list.structure_mutex.RUnlock()
 	for {
 		currentHead := list.head.Load()
-		newNode.next = currentHead
+		newNode.next.Store(currentHead)
 		if list.head.CompareAndSwap(currentHead, newNode) {
-			currentHead.prev = newNode
+			currentHead.prev.Store(newNode)
 			return ConcurrentListEntry[T]{list: list, ptr: newNode}
 		}
 	}
@@ -86,7 +86,7 @@ func (list *ConcurrentList[T]) IterateForward() iter.Seq[ConcurrentListEntry[T]]
 			if !cursor.mark.Load() && !yield(entry) {
 				break
 			}
-			cursor = cursor.next
+			cursor = cursor.next.Load()
 		}
 	}
 }
@@ -99,7 +99,7 @@ func (list *ConcurrentList[T]) IterateBackwards() iter.Seq[ConcurrentListEntry[T
 			if !cursor.mark.Load() && !yield(entry) {
 				break
 			}
-			cursor = cursor.prev
+			cursor = cursor.prev.Load()
 		}
 	}
 }
@@ -119,25 +119,22 @@ func (list *ConcurrentList[T]) attemptPrune() {
 		return
 	}
 	defer list.structure_mutex.Unlock()
-	cursor := list.head.Load()
-	for cursor != nil {
-		if cursor.mark.Load() && cursor.prev == nil {
-			list.head.Store(cursor.next)
+	for cursor := list.head.Load(); cursor != nil; cursor = cursor.next.Load() {
+		if !cursor.mark.Load() {
+			continue
 		}
-		if cursor.mark.Load() && cursor.next == nil {
-			list.tail.Store(cursor.prev)
+		if cprev := cursor.prev.Load(); cprev != nil {
+			cprev.next.Store(cursor.next.Load())
+		} else {
+			list.head.Store(cursor.next.Load())
 		}
-		if cursor.mark.Load() && cursor.prev != nil {
-			cursor.prev.next = cursor.next
+		if cnext := cursor.next.Load(); cnext != nil {
+			cnext.prev.Store(cursor.prev.Load())
+		} else {
+			list.tail.Store(cursor.prev.Load())
 		}
-		if cursor.mark.Load() && cursor.next != nil {
-			cursor.next.prev = cursor.prev
-		}
-		if cursor.mark.Load() {
-			list.node_count.Add(-1)
-			list.marked_count.Add(-1)
-		}
-		cursor = cursor.next
+		list.node_count.Add(-1)
+		list.marked_count.Add(-1)
 	}
 }
 
