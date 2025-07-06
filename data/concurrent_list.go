@@ -106,6 +106,9 @@ func (list *ConcurrentList[T]) IterateBackwards() iter.Seq[ConcurrentListEntry[T
 
 func (list *ConcurrentList[T]) mustPrune() bool {
 	currentNodeCount := list.node_count.Load()
+	if currentNodeCount == 0 {
+		return false
+	}
 	currentMarkedCount := list.marked_count.Load()
 	currentMarkedRateo := float64(currentMarkedCount) / float64(currentNodeCount)
 	return currentMarkedRateo > list.rm_threshold
