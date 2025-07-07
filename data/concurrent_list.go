@@ -138,7 +138,8 @@ func (list *ConcurrentList[T]) tryPrune() {
 		return
 	}
 	defer list.pruningMutex.Unlock()
-	for range len(list.markedForDeletion) {
+	markedCount := len(list.markedForDeletion)
+	for range markedCount {
 		toPrune := <-list.markedForDeletion
 		list.removeNode(toPrune)
 	}
