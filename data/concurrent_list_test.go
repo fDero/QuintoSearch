@@ -9,7 +9,7 @@ import (
 
 func TestConcurrentListInsertions(t *testing.T) {
 	const numItems = 1000
-	list := NewDefaultLinkedList[string]()
+	list := NewLinkedList[string]()
 	var wg sync.WaitGroup
 
 	entries := make([]ConcurrentListEntry[string], numItems)
@@ -41,7 +41,7 @@ func TestConcurrentListInsertionsAndDeletions(t *testing.T) {
 	const numItemsStep2 = 500
 	var expectedSize atomic.Int64
 
-	list := NewLinkedList[string](0.0)
+	list := NewLinkedList[string]()
 	var wg sync.WaitGroup
 
 	entries := make([]ConcurrentListEntry[string], numItemsStep1)
@@ -90,7 +90,7 @@ func TestConcurrentListInsertionsAndDeletionsAndIterations(t *testing.T) {
 	const numItemsStep2 = 500
 	var expectedSize atomic.Int64
 
-	list := NewLinkedList[string](0.0)
+	list := NewLinkedList[string]()
 	var wg sync.WaitGroup
 
 	entries := make([]ConcurrentListEntry[string], numItemsStep1)
