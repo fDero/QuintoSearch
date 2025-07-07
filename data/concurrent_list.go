@@ -47,10 +47,18 @@ type concurrentListNode[T any] struct {
 	item T
 }
 
-func NewLinkedList[T any]() *ConcurrentList[T] {
+func NewDefaultLinkedList[T any]() *ConcurrentList[T] {
+	return NewLinkedList[T](0.4)
+}
+
+func NewLinkedList[T any](rm_threshold float64) *ConcurrentList[T] {
 	return &ConcurrentList[T]{
-		rm_threshold: 0.4,
+		rm_threshold: rm_threshold,
 	}
+}
+
+func (list *ConcurrentList[T]) Size() int {
+	return int(list.node_count.Load() - list.marked_count.Load())
 }
 
 func (list *ConcurrentList[T]) InsertFront(value T) ConcurrentListEntry[T] {
