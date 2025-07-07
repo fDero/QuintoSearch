@@ -145,12 +145,14 @@ func (list *ConcurrentList[T]) tryPrune() {
 }
 
 func (list *ConcurrentList[T]) removeNode(listNode *concurrentListNode[T]) {
-	if listNode == nil || listNode.mark.Load() {
+	if listNode == nil {
 		return
 	}
-	listNode.mark.Store(true)
+	if !listNode.mark.Load() {
+		listNode.mark.Store(true)
+		list.size.Add(-1)
+	}
 	link := listNode.link.Load()
-	defer list.size.Add(-1)
 	if link.prev == nil {
 		list.markedForDeletion <- listNode
 		return
