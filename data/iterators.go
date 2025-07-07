@@ -38,6 +38,14 @@ func ZipIterators[T, U any](firstIterator iter.Seq[T], secondIterator iter.Seq[U
 	}
 }
 
+func CountIterations[T any](seq iter.Seq[T]) int {
+	count := 0
+	for range seq {
+		count++
+	}
+	return count
+}
+
 func ZipSlices[T, U any](firstSlice []T, secondSlice []U) iter.Seq2[T, U] {
 	return ZipIterators(
 		NewSliceIterator(firstSlice),
