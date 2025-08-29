@@ -15,7 +15,6 @@ package data
 
 import (
 	"iter"
-	"sync"
 	"sync/atomic"
 )
 
@@ -24,7 +23,7 @@ type ConcurrentList[T any] struct {
 	tail atomic.Pointer[concurrentListNode[T]]
 	size atomic.Int64
 
-	pruningMutex         sync.Mutex
+	pruningRighNow       atomic.Bool
 	markedForDeletion    chan *concurrentListNode[T]
 	markedNodesThreshold float64
 }
@@ -42,6 +41,7 @@ type concurrentListLink[T any] struct {
 
 func NewLinkedList[T any]() *ConcurrentList[T] {
 	emptyList := &ConcurrentList[T]{}
+	emptyList.markedForDeletion = make(chan *concurrentListNode[T])
 	emptyList.head.Store(nil)
 	emptyList.tail.Store(nil)
 	emptyList.size.Store(0)
@@ -65,6 +65,8 @@ func (list *ConcurrentList[T]) InsertFront(value T) ConcurrentListEntry[T] {
 			if currentHead != nil {
 				oldHeadLink := currentHead.link.Load()
 				oldHeadLink.prev = newNode
+			} else {
+				list.tail.Store(newNode)
 			}
 			return ConcurrentListEntry[T]{list: list, ptr: newNode}
 		}
@@ -131,13 +133,13 @@ func (list *ConcurrentList[T]) tryPrune() {
 	toPruneCount := len(list.markedForDeletion)
 	sizeFloat := float64(list.size.Load())
 	countFloat := float64(toPruneCount)
-	if toPruneCount == 0 || sizeFloat/countFloat <= list.markedNodesThreshold {
+	if toPruneCount == 0 || countFloat/sizeFloat <= list.markedNodesThreshold {
 		return
 	}
-	if !list.pruningMutex.TryLock() {
+	if !list.pruningRighNow.CompareAndSwap(false, true) {
 		return
 	}
-	defer list.pruningMutex.Unlock()
+	defer list.pruningRighNow.Store(false)
 	markedCount := len(list.markedForDeletion)
 	for range markedCount {
 		toPrune := <-list.markedForDeletion
