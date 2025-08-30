@@ -13,9 +13,9 @@ type wrappedIndexChunk struct {
 }
 
 type PersistenceConfig struct {
-	maxCachedChunks int64
-	maxChunkSize    int
-	ioHandler       diskHandler
+	MaxCachedChunks int64
+	MaxChunkSize    int
+	IoHandler       diskHandler
 }
 
 type PersistenceManager struct {
@@ -62,10 +62,10 @@ func (pm *PersistenceManager) retrieveChunkFromCache(key string) *indexChunk {
 func (pm *PersistenceManager) retrieveChunkFromDisk(key string) *indexChunk {
 	var chunkPtr *indexChunk = nil
 	for !pm.chunkPool.Contains(key) {
-		if pm.cacheSize.Load() >= pm.config.maxCachedChunks {
+		if pm.cacheSize.Load() >= pm.config.MaxCachedChunks {
 			pm.evictNotPendingLRU()
 		}
-		chunkPtr = newIndexChunk(key, pm.config.ioHandler)
+		chunkPtr = newIndexChunk(key, pm.config.IoHandler)
 		pm.cacheSize.Add(1)
 		pm.chunkPool.Set(key, wrappedIndexChunk{
 			listEntry: pm.accessList.InsertFront(key),
@@ -83,7 +83,7 @@ func (pm *PersistenceManager) retrieveChunk(key string) *indexChunk {
 	if chunk == nil {
 		return pm.retrieveChunkFromDisk(key)
 	}
-	if chunk.termTrackers.Size() > int(pm.config.maxChunkSize) {
+	if chunk.termTrackers.Size() > int(pm.config.MaxChunkSize) {
 		new_chunk := chunk.split()
 		pm.chunkPool.Set(new_chunk.chunkKey, wrappedIndexChunk{
 			listEntry: pm.accessList.InsertFront(new_chunk.chunkKey),
@@ -98,13 +98,13 @@ func (pm *PersistenceManager) retrieveChunk(key string) *indexChunk {
 func (pm *PersistenceManager) IterateTerms(term string) iter.Seq[core.TermTracker] {
 	return func(yield func(core.TermTracker) bool) {
 		chunk := pm.retrieveChunk("term-" + term)
-		for chunk != nil && chunk.nextChunkKey != "" {
+		for chunk != nil && chunk.termTrackers.Size() > 0 {
 			for term := range chunk.iterate() {
 				if !yield(term) {
 					break
 				}
 			}
-			chunk = pm.retrieveChunkFromCache(chunk.nextChunkKey)
+			chunk = pm.retrieveChunk(chunk.nextChunkKey)
 		}
 	}
 }
