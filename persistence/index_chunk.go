@@ -17,9 +17,11 @@ update it. After an update, the `indexChunk` must be written back to disk.
 package persistence
 
 import (
+	"fmt"
 	"iter"
 	"quinto/core"
 	"quinto/data"
+	"strconv"
 )
 
 type indexChunk struct {
@@ -27,6 +29,7 @@ type indexChunk struct {
 	chunkKey         string
 	nextChunkKey     string
 	pendingWriteBack bool
+	splitCounter     uint64
 	handler          diskHandler
 	rwMutex          core.ReadWriteMutex
 }
@@ -58,15 +61,19 @@ func newIndexChunk(chunkKey string, handler diskHandler) *indexChunk {
 		nextChunkKey:     "",
 		pendingWriteBack: false,
 		handler:          handler,
+		splitCounter:     0,
 		rwMutex:          core.NewWritersFirstRWMutex(),
 	}
 	reader, exists := handler.getReader(chunkKey)
 	if !exists || reader == nil {
 		return chunk
 	}
-	errors := [2]error{}
+	errors := [3]error{}
+	var splitCounterString string = ""
 	chunk.chunkKey, errors[0] = decodeStringFromDisk(reader)
 	chunk.nextChunkKey, errors[1] = decodeStringFromDisk(reader)
+	splitCounterString, errors[2] = decodeStringFromDisk(reader)
+	chunk.splitCounter, _ = strconv.ParseUint(splitCounterString, 10, 64)
 	panicWhenSomeErrorsOccurred(errors[:])
 	for tracker := range iterateTermTrackersFromDisk(reader) {
 		chunk.termTrackers.Insert(tracker)
@@ -84,6 +91,7 @@ func (chunk *indexChunk) writeBack() {
 	defer finalize()
 	encodeStringToDisk(writer, chunk.chunkKey)
 	encodeStringToDisk(writer, chunk.nextChunkKey)
+	encodeStringToDisk(writer, fmt.Sprint(chunk.splitCounter))
 	encodeTermTrackersToDisk(writer, chunk.iterate())
 	chunk.pendingWriteBack = false
 }
@@ -109,12 +117,26 @@ func (chunk *indexChunk) insertIterable(termsIterator iter.Seq[core.TermTracker]
 	}
 }
 
-func (chunk *indexChunk) removeFromDocument(docId core.DocumentId) {
+func (chunk *indexChunk) split() *indexChunk {
 	chunk.rwMutex.Lock()
+	chunk.splitCounter++
 	defer chunk.rwMutex.Unlock()
-	predicate := func(tracker core.TermTracker) bool {
-		return tracker.DocId == docId
+	newChunk := &indexChunk{
+		termTrackers:     newSortedArrayOfTermTrackers(),
+		chunkKey:         chunk.chunkKey + "-" + fmt.Sprint(chunk.splitCounter),
+		nextChunkKey:     chunk.nextChunkKey,
+		pendingWriteBack: false,
+		handler:          chunk.handler,
+		rwMutex:          core.NewWritersFirstRWMutex(),
 	}
-	removed := chunk.termTrackers.RemoveIf(predicate)
-	chunk.pendingWriteBack = chunk.pendingWriteBack || removed
+	chunk.nextChunkKey = newChunk.chunkKey
+	counter := 0
+	for tracker := range chunk.iterate() {
+		if counter >= chunk.termTrackers.Size()/2 {
+			newChunk.termTrackers.Insert(tracker)
+			chunk.termTrackers.Remove(tracker)
+		}
+		counter++
+	}
+	return newChunk
 }
